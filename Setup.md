@@ -2,11 +2,8 @@
 
 FlashGrid DOC for global Azure.
 
-    - White Paper for Oracle RAC on FlashGrid on Azure  
-    https://www.flashgrid.io/wp-content/sideuploads/resources/FlashGrid_OracleRAC_in_Azure.pdf
-
-    - SkyCluster Deployment Guide  
-    https://www.flashgrid.io/wp-content/sideuploads/resources/FlashGrid_SkyCluster_Deployment_Guide_for_Azure.pdf
+   - [White Paper for Oracle RAC on FlashGrid on Azure](https://www.flashgrid.io/wp-content/sideuploads/resources/FlashGrid_OracleRAC_in_Azure.pdf)  
+   - [SkyCluster Deployment Guide](https://www.flashgrid.io/wp-content/sideuploads/resources/FlashGrid_SkyCluster_Deployment_Guide_for_Azure.pdf)  
 
 Facts on China Azure.
 

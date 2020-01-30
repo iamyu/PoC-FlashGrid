@@ -22,13 +22,6 @@ Facts on China Azure.
     |  M64      | 64     | 1024 GiB | 2000 GiB  |  80000 / 800 (1228)                |  40000   |  64          |  16000 Mbps    |
 
 
-Max cached and temp storage throughput: IOPS / MBps  (cache size in GiB)
-32000 / 256 (400)
-
-
-
-
-
 - Quorum node
 
     |  VM Size  | vCore  | RAM      | Local SSD | Max IOPS |  Max Data Disks |
@@ -43,6 +36,7 @@ Max cached and temp storage throughput: IOPS / MBps  (cache size in GiB)
 
 - Architecture
 
+    [Visio File link]
 
 **FlashGrid SkyCluster Launcher**
 
@@ -125,7 +119,7 @@ Use another, external time server with or without using VMICTimeSync host-time.
 
 2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, we need to modify the template before deployment. 
 
-    a. Save the template as XML doc.
-    b. Make sure you have get the VHD file from FlashGrid and convert it as an OS Image.
-    c. Search for ImageReference in the XML doc and ensure the ImageReference points to your Image resource ID.
-    d. Deploy the XML template from Azure Portal -> Create a Resource -> Template Deployment.
+    a. Save the template as XML doc.  
+    b. Make sure you have get the VHD file from FlashGrid and convert it as an OS Image.  
+    c. Search for ImageReference in the XML doc and ensure the ImageReference points to your Image resource ID.  
+    d. Deploy the XML template from Azure Portal -> Create a Resource -> Template Deployment.  

@@ -15,11 +15,18 @@ Facts on China Azure.
 
 - Database node:  
 
-    |  VM Size  | vCore  | RAM      | Local SSD | Max IOPS |  Max Data Disks  |
-    |  ----     | ----   | ----     | ----      | ----     |  ----        |
-    |  E16s v3  | 16     | 128 GiB  | 256 GiB   |  25600   |  32          | 
-    |  E64s v3  | 64     | 432 GiB  | 864 GiB   |  80000   |  32          | 
-    |  M64      | 64     | 1024 GiB | 2000 GiB  |  40000   |  64          | 
+    |  VM Size  | vCore  | RAM      | Local SSD |  L-SSD  (IOPS / MBps / Cache GiB)  | Max IOPS |  Max Disks   | Max Bandwidth  |
+    |  ----     | ----   | ----     | ----      |  ----                              | ----     |  ----        |  ----          |
+    |  E16s v3  | 16     | 128 GiB  | 256 GiB   |  32000 / 256 (400)                 |  25600   |  32          |  8000 Mbps     |
+    |  E64s v3  | 64     | 432 GiB  | 864 GiB   |  128000 / 1024 (1600)              |  80000   |  32          |  30000 Mbps    |
+    |  M64      | 64     | 1024 GiB | 2000 GiB  |  80000 / 800 (1228)                |  40000   |  64          |  16000 Mbps    |
+
+
+Max cached and temp storage throughput: IOPS / MBps  (cache size in GiB)
+32000 / 256 (400)
+
+
+
 
 
 - Quorum node
@@ -63,5 +70,62 @@ Facts on China Azure.
    - p30116802_122010_Linux-x86-64.zip - GI RELEASE UPDATE 12.2.0.1.191015. **Requires Oracle support subscription.**
    - p6880880_190000_Linux-x86-64.zip - OPatch 12.2.0.1.18 for DB 19.x releases, Platform: Linux x86-64. **Requires Oracle support subscription.**
 
-    Sample URL: https://chinaracpoc.blob.core.chinacloudapi.cn/software  
+    Ensure the data is saved in File Share with acceptable performance within China, like China Azure Blob storage https://chinaracpoc.blob.core.chinacloudapi.cn/software. 
 
+    https://allenklab.blob.core.windows.net/flashgrid
+
+
+    SkyCluster Launcher checks file existance only, not MD5. it is YOUR responsibility to verify packages are safe to deploy. For test purpose, we can create files so SkyCluster Launcher can continue.
+
+4. Nodes
+   -   Availability Zones or Fault Domains: No AZ, 2 Fault Domains
+   -   Cluster Node: Select based on workload. Refer to [IO Test Result]
+
+5. Storage:
+   - Select storage based on capacity and performance. Large Singl Disk = Higher Performance.
+   - ASM Capacity does not equal to all the disk attached in the cluster due to mirror.
+
+6. Memory
+   - Automatically configure HugePages - Checked. 
+   - % of System Memory allocated for Databases (SGA+PGA) - 80 (default)
+   - % of the Database Memory allocated for SGA - 60 (default)
+
+7. Listener Ports: 
+   - SCAN listener Port: 1521
+   - Local listener Port: 1522
+
+8. Network: 
+   - Create new VNet: Unchecked. Prefer to configure network environment before deploy Oracle RAC. In most case, network topology should has been designed before Oracle RAC. Ensure requird port are allowed in the RAC subnet.
+   - Assign Public IPs to Cluster Nodes: keep it unchecked for secure purpose. Servers should be able to access requird internet service, like NTP server through default Azure SNAT egress.
+
+9. DNS
+    
+    - Inter-Cluster communcation is handled by
+    - DNS is required for cluster external communication
+
+10. Time Zone
+
+https://docs.azure.cn/zh-cn/virtual-machines/linux/time-sync, need to verify from FlashGrid Image.
+
+The default configuration for Azure Marketplace images uses both NTP time and VMICTimeSync host-time.
+Host-only using VMICTimeSync.
+Use another, external time server with or without using VMICTimeSync host-time.
+
+- Time Zone: Asia/Shanghai
+- NTP Servers: 
+
+11. Alert
+12. Tags
+13. Validate
+14. Launch
+
+**Deploy ARM Template**
+
+1. At the end of the SkyCluster Launcher, a cfg file will be saved to keep all the configuration in the wizard. 
+
+2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, we need to modify the template before deployment. 
+
+    a. Save the template as XML doc.
+    b. Make sure you have get the VHD file from FlashGrid and convert it as an OS Image.
+    c. Search for ImageReference in the XML doc and ensure the ImageReference points to your Image resource ID.
+    d. Deploy the XML template from Azure Portal -> Create a Resource -> Template Deployment.

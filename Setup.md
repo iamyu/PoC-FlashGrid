@@ -11,7 +11,7 @@ Facts on China Azure.
 - No Availability Zone in China regions
 - 2 Fault Domains in Availability Set of each region 
 
-**Environment**
+**SkyCluster Quick Launcher**
 
 - Database node:  
 
@@ -39,6 +39,9 @@ Facts on China Azure.
     [Visio File link]
 
 **FlashGrid SkyCluster Launcher**
+
+    Preparation: please contact flashgrid to get vhd image and configuration template file. then go to https://1910.cloudprov.flashgrid.io/ to upload the configuration file and continue the wizard.
+
 
 1. Cluster Info
 
@@ -77,7 +80,7 @@ Facts on China Azure.
 
 5. Storage:
    - Select storage based on capacity and performance. Large Singl Disk = Higher Performance.
-   - ASM Capacity does not equal to all the disk attached in the cluster due to mirror.
+   - ASM Capacity does not equal to all the disk attached in the cluster due to redudant.
 
 6. Memory
    - Automatically configure HugePages - Checked. 
@@ -108,10 +111,17 @@ Use another, external time server with or without using VMICTimeSync host-time.
 - Time Zone: Asia/Shanghai
 - NTP Servers: 
 
-11. Alert
-12. Tags
-13. Validate
-14. Launch
+	   server 0.cn.pool.ntp.org
+	   server 1.cn.pool.ntp.org
+	   server 2.cn.pool.ntp.org
+	   server 3.cn.pool.ntp.org
+
+https://www.pool.ntp.org/zone/cn
+
+1.  Alert
+2.  Tags
+3.  Validate
+4.  Launch
 
 **Deploy ARM Template**
 
@@ -119,7 +129,7 @@ Use another, external time server with or without using VMICTimeSync host-time.
 
 2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, we need to modify the template before deployment. 
 
-    a. Save the template as XML doc.  
+    a. Save the template as JSON file.  
     b. Make sure you have get the VHD file from FlashGrid and convert it as an OS Image.  
-    c. Search for ImageReference in the XML doc and ensure the ImageReference points to your Image resource ID.  
+    c. Search for ImageReference in the JSON file and ensure the ImageReference points to your Image resource ID.  
     d. Deploy the XML template from Azure Portal -> Create a Resource -> Template Deployment.  

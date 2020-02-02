@@ -1,0 +1,41 @@
+# install Oracle 12c. SQL instance is not set to auto restart to save resource usage when not doing Oracle test.
+
+# start the orcl Oracle instance
+
+#start oracle instance
+sqlplus / as sysdba
+startup
+
+# verify DB has been started
+select name from v$database;
+select status from v$instance;
+
+# start instance Listener
+lsnrctl start
+
+# Connect to Oracle 12C EM Express.
+exec dbms_xdb_config.sethttpport(8888);
+exec dbms_xdb_config.sethttpport(5500);
+
+https://192.168.5.10:5500/em
+https://kangxhpipseaoss.southeastasia.cloudapp.azure.com:5500/em
+
+user: slob
+pwd: slob
+
+# Create Snapshot before Slob test
+exec dbms_workload_repository.create_snapshot();
+select snap_id, snap_level, to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin from dba_hist_snapshot order by 1;
+
+# load slob data, only need to run once.
+sh /opt/SLOB/setup.sh IOPS 8
+
+# run slob test
+
+# Create Snapshot after Slob test
+exec dbms_workload_repository.create_snapshot();
+select snap_id, snap_level, to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin from dba_hist_snapshot order by 1;
+
+
+执行生成AWR报告：
+@?/rdbms/admin/awrrpt

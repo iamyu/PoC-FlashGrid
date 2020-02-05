@@ -127,9 +127,11 @@ https://www.pool.ntp.org/zone/cn
 
 1. At the end of the SkyCluster Launcher, a cfg file will be saved to keep all the configuration in the wizard. 
 
-2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, we need to modify the template before deployment. 
+2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, contact FlashGrid directly to get VHD and configure file. 
 
-    a. Save the template as JSON file.  
-    b. Make sure you have get the VHD file from FlashGrid and convert it as an OS Image.  
-    c. Search for ImageReference in the JSON file and ensure the ImageReference points to your Image resource ID.  
-    d. Deploy the XML template from Azure Portal -> Create a Resource -> Template Deployment.  
+    a. Convert VHD as an OS Image in China Azure subscription.
+    b. Modify the CNF file to change the image Resource ID we just created.  
+    c. Upload the new CNF file to flashgrid launcher wizard, go through the wizard again to make necessary changes.
+    d. Before deploy the resource, save the configration again for further usage.
+    e. Deploy SkyCluster. It is better to save the JSON template in case any manual changes requires. 
+

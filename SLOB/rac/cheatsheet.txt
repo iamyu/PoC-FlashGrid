@@ -1,0 +1,143 @@
+# Environment is setup using FlashGrid SkyCluster. 
+
+# Verify the status of flashgrid.
+####################################
+
+    [az-admin@mcracpoc1 ~]$ sudo flashgrid-cluster
+    FlashGrid 19.6.125.61312 #b88c44413835d07ec73adbf88c218a28329fc401
+    License: Active, Expires 2020-03-03
+    Licensee: demo
+    Support plan: Demo
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FlashGrid running: OK
+    Clocks check: OK
+    Configuration check: OK
+    Network check: OK
+
+    Querying nodes: mcracpoc1, mcracpoc2, mcracpocq ...
+
+    Cluster Name: mcracpoc
+    Cluster status: Good
+    -----------------------------------------------------------------
+    Node       Status  ASM_Node  Storage_Node  Quorum_Node  Failgroup
+    -----------------------------------------------------------------
+    mcracpoc1  Good    Yes       Yes           No           MCRACPOC1
+    mcracpoc2  Good    Yes       Yes           No           MCRACPOC2
+    mcracpocq  Good    No        No            Yes          MCRACPOCQ
+    -----------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------
+    GroupName  Status  Mounted   Type    TotalMiB  FreeMiB  OfflineDisks  LostDisks  Resync  ReadLocal  Vote
+    --------------------------------------------------------------------------------------------------------
+    DATA       Good    AllNodes  NORMAL  6291456   6291072  0             0          No      Enabled    None
+    FRA        Good    AllNodes  NORMAL  3145728   3145344  0             0          No      Enabled    None
+    GRID       Good    AllNodes  NORMAL  10240     9472     0             0          No      Enabled    3/3 
+    --------------------------------------------------------------------------------------------------------
+
+# Verify Disk Connection:
+
+    sudo blkid -s UUID
+    ls -l /dev/disk/azure/scsi1/
+    cat /etc/fstab
+    sudo lvdisplay && sudo  pvdisplay
+
+    lrwxrwxrwx 1 root root 12 Feb  3 10:06 lun0 -> ../../../sdc         <-- /u01
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun1 -> ../../../sdh         <-- GRID
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun2 -> ../../../sde         <-- DATA
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun3 -> ../../../sdi
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun4 -> ../../../sdd
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun5 -> ../../../sdg         <-- FRA
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun6 -> ../../../sdf
+    lrwxrwxrwx 1 root root 12 Feb  3 10:33 lun7 -> ../../../sdj
+
+# ASM Management 
+
+    sudo su - grid
+
+    sqlplus / as sysasm
+
+    column name format a15
+    column DG# format 99
+    select group_number DG#, name, state, type, total_mb, free_mb from v$asm_diskgroup;
+
+    # remove disk from DG with sqlplus
+
+    alter diskgroup DATA
+    drop disk mcracpoc1$lun3
+    drop disk mcracpoc1$lun4
+    drop disk mcracpoc2$lun3
+    drop disk mcracpoc2$lun4
+    rebalance wait;
+
+    # stop target on each local node
+    sudo flashgrid-node stop-target /dev/flashgrid/mcracpoc1.lun3
+    sudo flashgrid-node stop-target /dev/flashgrid/mcracpoc1.lun4
+    sudo flashgrid-node stop-target /dev/flashgrid/mcracpoc2.lun3
+    sudo flashgrid-node stop-target /dev/flashgrid/mcracpoc2.lun4
+
+    # Deattach the disks from VM.
+
+    # Rename the DATA diskgroup to P30. https://blogs.oracle.com/database4cn/asm-diskgroup
+    
+    SQL> show parameter spfile;
+
+        NAME				     TYPE	 VALUE
+        ------------------------------------ ----------- ------------------------------
+        spfile				     string	 +GRID/mcracpoc/ASMPARAMETERFILE/registry.253.1031300957
+
+    SQL> select name from v$datafile;
+    select name from v$datafile
+                    *
+    ERROR at line 1: ORA-01507: database not mounted
+
+    asmcmd umount DATA
+    renamedg phase=both dgname=DATA newdgname=P30 verbose=true 
+
+    # Create DiskGroup P60 and P80
+
+    sudo flashgrid-dg create --name P60 --normal --asm-compat 19.0.0.0.0 --db-compat 19.0.0.0.0 --au-size 4M --disks /dev/flashgrid/mcracpoc1.lun3 /dev/flashgrid/mcracpoc2.lun3
+
+    sudo flashgrid-dg create --name P80 --normal --asm-compat 19.0.0.0.0 --db-compat 19.0.0.0.0 --au-size 4M --disks /dev/flashgrid/mcracpoc1.lun4 /dev/flashgrid/mcracpoc2.lun4
+
+    sudo flashgrid-dg create --name P60S --normal --asm-compat 19.0.0.0.0 --db-compat 19.0.0.0.0 --au-size 4M --disks /dev/flashgrid/mcracpoc1.lun8 /dev/flashgrid/mcracpoc1.lun9 /dev/flashgrid/mcracpoc1.lun10 /dev/flashgrid/mcracpoc1.lun11 /dev/flashgrid/mcracpoc1.lun12 /dev/flashgrid/mcracpoc1.lun13 /dev/flashgrid/mcracpoc1.lun14 /dev/flashgrid/mcracpoc1.lun15 /dev/flashgrid/mcracpoc2.lun8 /dev/flashgrid/mcracpoc2.lun9 /dev/flashgrid/mcracpoc2.lun10 /dev/flashgrid/mcracpoc2.lun11 /dev/flashgrid/mcracpoc2.lun12 /dev/flashgrid/mcracpoc2.lun13 /dev/flashgrid/mcracpoc2.lun14 /dev/flashgrid/mcracpoc2.lun15
+
+# Create Oracle DB using DBCA
+
+
+
+#start oracle instance
+sqlplus / as sysdba
+startup
+
+# verify DB has been started
+select name from v$database;
+select status from v$instance;
+
+# start instance Listener
+lsnrctl start
+
+# Connect to Oracle 12C EM Express.
+exec dbms_xdb_config.sethttpport(8888);
+exec dbms_xdb_config.sethttpport(5500);
+
+https://192.168.5.10:5500/em
+https://kangxhpipseaoss.southeastasia.cloudapp.azure.com:5500/em
+
+user: slob
+pwd: slob
+
+# Create Snapshot before Slob test
+exec dbms_workload_repository.create_snapshot();
+select snap_id, snap_level, to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin from dba_hist_snapshot order by 1;
+
+# load slob data, only need to run once.
+sh /opt/SLOB/setup.sh IOPS 8
+
+# run slob test
+
+# Create Snapshot after Slob test
+exec dbms_workload_repository.create_snapshot();
+select snap_id, snap_level, to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin from dba_hist_snapshot order by 1;
+
+
+执行生成AWR报告：
+@?/rdbms/admin/awrrpt

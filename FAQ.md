@@ -22,6 +22,30 @@
         # Replace with your image name and target resource group name.
         New-AzImage -Image $imageConfig -ImageName 'YourImageName' -ResourceGroupName 'YourResourceGroup';
 
+    Q: Do i need license for RHEL?
+    A: sudo subscription-manager  list
+
+        +-------------------------------------------+
+        Installed Product Status
+        +-------------------------------------------+
+        Product Name:   dotNET on RHEL (for RHEL Server)
+        Product ID:     317
+        Version:        2.0
+        Arch:           x86_64
+        Status:         Unknown
+        Status Details: 
+        Starts:         
+        Ends:           
+
+        Product Name:   Red Hat Enterprise Linux Server
+        Product ID:     69
+        Version:        7.7
+        Arch:           x86_64
+        Status:         Unknown
+        Status Details: 
+        Starts:         
+        Ends:           
+
 
 **Deployment**
 
@@ -60,7 +84,15 @@
     A: sudo flashgrid-cluster verify
 
     Q: Time Sync requirement for FlashGrid?
-    A: 
+    A: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/time-sync
+
+        - NTP
+        - Chrony Service 
+
+            chronyc sources -v
+            cat /etc/chrony.conf 
+
+        - Oracle CTSS sync time before DB node, not quorum node
 
     Q: The deployment is reported as successful but there is not fg-pri virtual NIC on quorum node. Also, there other virtual NIC is created on DB node. is it normal?
 
@@ -68,8 +100,9 @@
     Q: Does it have IPv6 support?
 
 
-    Q: Storage Layout is as following. from wizard, we specificed 1024 x 3 and 512 x 3 for data disk. 5 GiB disk is used for disk group GRID. what is the usage for LUN0 107GiB?
-
+    Q: How manage disk created by the SkyCluster Launcher.
+    A: Besides the disk added in the ASM, there are another two disk created: 107GiB disk for install Oracle. One 5 GiB Disk attached for Grid usage. 
+    
     OS disk
         --------------------------------------------------------------------------------------------------------
         Name                Size        Storage account type        Encryption        Host caching
@@ -100,9 +133,37 @@
         GRID       Good    AllNodes  NORMAL  10240     9496     0             0          No      Enabled    3/3 
         --------------------------------------------------------------------------------------------------------
 
+**IO Stress Test**
+
     Q: what is the IO Stack difference w/o ReadLocal?
-    
+    A: 
+
+    Q: Max number of Data disk changes alone with the VM size? any best practise/suggest about the disk group?
+    A: 
 
     Q: VM Shutdown process/sequence?
+    A: link "https://kb.flashgrid.io/maintenance" does not work.
 
+    Q: How to rename DiskGroup DATA -> P30?
+    A: 
+
+
+    Q: Do I have to distrubute the storage to node equally? Can i add 1 disk on node 1 and two disk on Node 2 for one DG?
+    A: 
+
+    Q: Can I use disk size ovre 4T Premium SSD? disk size over 4TB does not support ReadOnly/ReadWrite Cache.
+    A:
+
+    Q: does is matter for "The number of quorum disks is fewer than the recommended minimum of 1 for this disk group configuration"?
+    A: as the main task is to test IO performance. only two disks are added to the DiskGroup. the group state is Good now. after cluster reboot.
+
+    Q: what is the suggested process for creating DB on P30, P60 and P80 DG for IO Stress Test? situaitons like:
+    
+        - AU size recommend for differnent DG due to disk size?
+        - sperate data file and REDO log to different DG
+        - do i need to manaually config SPA and PGA everytime when scaling?
+    A: 
+
+    Q: Shall we enable SWAP disk. when creating DB, this is warning for SWAP space is too small. by default Azure VM does not create SWAP on Temp disk.
+    A: 
 

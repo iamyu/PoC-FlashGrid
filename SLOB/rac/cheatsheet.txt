@@ -139,5 +139,7 @@ exec dbms_workload_repository.create_snapshot();
 select snap_id, snap_level, to_char(begin_interval_time, 'dd/mm/yy hh24:mi:ss') begin from dba_hist_snapshot order by 1;
 
 
-执行生成AWR报告：
-@?/rdbms/admin/awrrpt
+
+
+        cat /u01/app/oracle/product/19.3.0/dbhome_1/network/admin/tnsnames.ora
+        tnsping p30db

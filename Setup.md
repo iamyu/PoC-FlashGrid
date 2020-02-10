@@ -135,3 +135,6 @@ https://www.pool.ntp.org/zone/cn
     d. Before deploy the resource, save the configration again for further usage.
     e. Deploy SkyCluster. It is better to save the JSON template in case any manual changes requires. 
 
+
+
+

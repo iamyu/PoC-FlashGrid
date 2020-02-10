@@ -81,8 +81,8 @@
 
     **NOTE: **
         - Resize SYSTEM/SYSAUX to prevent SLOB load failure. Authough it set to AUTO EXTEND, table space still used up like below example. 
-
-            TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
+  
+              TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
             ------------------------------ --- ----------- --------------- ------------ ------------ ----------- ------------ --------
             SYSTEM			       YES    32767.98		  2.78		        920	        912.06          99.14	     7.94	    1
             SYSAUX			       YES    32767.98		  1.84		        630	        603             95.71	       27	    4
@@ -92,78 +92,19 @@
             USERS			       YES    32767.98		   .01		        5	        2.69            53.75	     2.31	   46
             TEMP			       YES    32767.98		     0	            7529	    0	            0	        7529	  100
 
- **IO Stress Test**
-
-    |                      |  slob-p30db         |  slob-p60db       |  slob-p60sdb      |  slob-p80db       |   
-    |  ----                |  ----               |  ----             |  ----             |  ----             | 
-    | Scale size           |  8GB                |  8GB              |  8GB              |  8GB              |
-    | Schema               |  64                 |  128              |  128              |  128              |
-    | HOT_SCHEMA_FREQUENCY |  0                  |  0                |  0                |  0                |
-    | DO_HOTSPOT           |  FALSE              |  FALSE            |  FALSE            |  FALSE            |
-    | RUN_TIME             |  600                |  600              |  600              |  600              |  
+        - Set REDO logs to using FRA Disk Group to avoid any IO impact on Database DG.
 
 
-        **NOTE:**
-          - Cool boot Oracle RAC to start only one DB at one time for testing
-          - For each VM size, test twice for SGA set to MIN and MAX
+ **SLOB Test**
 
+    1. Disable Read-Only Cache on all the disks. 
+    2. Run Quick SLOB test to find out the right parameter to stree IO for P30, P60, P60S and P80.
+     
+    
+    
+    Identify stress testing parameter by tuning schema, thread/schema and work_unit. monitor disk load with iostat for expected IOPS
 
-    1. There should be no DB instance running. Only start the DB for current load testing. 
-
-        srvctl status database -thishome
-        srvctl start database -db p30db
-        srvctl status database -db p30db
-
-        cat /u01/app/oracle/product/19.3.0/dbhome_1/network/admin/tnsnames.ora
-        tnsping p30db
-
-    2. Resize System & SysAux table space (10GiB). Default size full when doing some operation. suspect it will cause perf issues on DB. 
-
-
-
-        one example for tablespace usage when loading SLOB schema without resize SYSTEM and SysAUX
-
-        TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
-        ------------------------------ --- ----------- --------------- ------------ ------------ ----------- ------------ -----------
-        SYSTEM			       YES    32767.98		  2.78		        920	        912.06          99.14	     7.94	    1
-        SYSAUX			       YES    32767.98		  1.84		        630	        603             95.71	       27	    4
-        IOPS			       YES    33554432		   .62	            217728      207306.19       95.21	 10421.81	    5
-        UNDOTBS1		       YES    32767.98		   .09		        345	        28.25	        8.19	   316.75	   92
-        UNDOTBS2		       YES    32767.98		   .08		        75	        26.56           35.42	    48.44	   65
-        USERS			       YES    32767.98		   .01		        5	        2.69            53.75	     2.31	   46
-        TEMP			       YES    32767.98		     0	            7529	    0	            0	        7529	  100
-
-
-    3. SLOB environment configuration. Seperated SLOB folder (slob-p30db, slob-p60db, slob-p60sdb, slob-p80db) are created accroding to each Database under /home/oracle. Go to corresponding folder to do IO test. 
-
-        sh ~/slob-p30db/setup.sh IOPS 64
-
-            NOTIFY  : 2020.02.06-14:56:47 : Row and block counts for SLOB table(s) reported in ./slob_data_load_summary.txt
-            NOTIFY  : 2020.02.06-14:56:47 : Please examine ./slob_data_load_summary.txt for any possbile errors
-            NOTIFY  : 2020.02.06-14:56:47 : 
-            NOTIFY  : 2020.02.06-14:56:47 : NOTE: No errors detected but if ./slob_data_load_summary.txt shows errors then
-            NOTIFY  : 2020.02.06-14:56:47 : examine /home/oracle/slob-p30db/cr_tab_and_load.out
-
-            NOTIFY  : 2020.02.06-14:56:47 : SLOB setup complete. Total setup time:  (16185 seconds)
-
-
-
-        sh ~/slob-p60db/setup.sh IOPS 128
-        
-        sh ~/slob-p60sdb/setup.sh IOPS 128
-
-        sh ~/slob-p80db/setup.sh IOPS 128
-        
-    4. 
-
-
-
-
-    5. Set SGA to 80% to increase cache hit and reduce physical read IO.
-    6.  
-    7.  Set SGA to 5% to test physical IO with both Read & Write
-
-   
+    iostat -x sdc sdd sde sdf sdg sdch sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr 10 20
 
 **RESULT**
 
@@ -176,7 +117,20 @@
         P80     32,767                  20,000              900
         --------------------------------------------------------------------------------------------------------
 
+    For each individual AWR report, saved in IOStress folder. Name conversion as following: 
+
+        awr_p30x2_d8s_s64_t1_wu64
+        |   |     |   |   |  |--------------Work Unit - 64
+        |   |     |   |   |-----------------1 thread per schema
+        |   |     |   |---------------------load 64 Schema
+        |   |     |-------------------------VM Size - D8s
+        |   |-------------------------------2 P30 disk in DG
+        |-----------------------------------AWR Report Tag     
+
+**Conclusion**
+
+1. Due to Host Read-Only Cache, the total Disk IOPS can exceed limit since the IO does not really goes to storage. 
 
 
 
-- Test P60*2 DG(None Host Caching) vs P30*16 DG (Read-Only Host Caching).
+2. 

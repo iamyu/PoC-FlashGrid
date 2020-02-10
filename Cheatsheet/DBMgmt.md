@@ -64,6 +64,9 @@
     alter system switch all logfile;
     alter database drop logfile group x;
 
+    col member format a50
+    select GROUP#,TYPE,MEMBER from v$logfile;
+
 
 **Session**
 

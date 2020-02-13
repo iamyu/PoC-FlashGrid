@@ -1,7 +1,6 @@
 # Environment is setup using FlashGrid SkyCluster. 
 
 # Verify the status of flashgrid.
-####################################
 
     [az-admin@mcracpoc1 ~]$ sudo flashgrid-cluster
     FlashGrid 19.6.125.61312 #b88c44413835d07ec73adbf88c218a28329fc401
@@ -76,7 +75,6 @@
 
     # Deattach the disks from VM.
 
-   
     # Create DiskGroup P60 and P80
 
     sudo flashgrid-dg create --name P60 --normal --asm-compat 19.0.0.0.0 --db-compat 19.0.0.0.0 --au-size 4M --disks /dev/flashgrid/mcracpoc1.lun3 /dev/flashgrid/mcracpoc2.lun3
@@ -85,8 +83,10 @@
 
 # FlashGrid cluster Management
 
-    # Shutdown entire cluster:
+    # Shutdown entire cluster after stop all the DBs
     sudo /u01/app/19.3.0/grid/bin/crsctl stop cluster -all
 
+# Check Disk IO
 
+    iostat sdx -xmt 1   <-- better to monitor on specfic disk as there are a lot of disk connected. note the x ID may change after reboot.
 

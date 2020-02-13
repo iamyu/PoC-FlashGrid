@@ -43,11 +43,21 @@
     GROUP BY df.tablespace_name, df.bytes, df.maxbytes
     ORDER BY 4 DESC;
 
+**DB files**
+
+    col tablespace_name format a16;
+    col file_name format a60;
+    SELECT TABLESPACE_NAME, FILE_NAME, BYTES/1024/1024 MB FROM DBA_DATA_FILES;
 
 **Change table space size**
     col FILE_NAME format a50
     set linesize 300
     SELECT  FILE_NAME ,  BLOCKS, TABLESPACE_NAME FROM DBA_DATA_FILES;
+
+**Query REDO LOG**
+
+    col member format a50
+    select GROUP#,TYPE,MEMBER from v$logfile;
 
 **Manage REDO Log**
 
@@ -58,10 +68,12 @@
     column mb format 99999;
     select group#, thread#, status, bytes/1024/1024 mb from v$log;
 
-    alter database add logfile thread 1 group 5 ('+FRA') size 10g, group 6 ('+FRA') size 10;
-    alter database add logfile thread 2 group 7 ('+FRA') size 10g, group 8 ('+FRA') size 10;
+    alter database add logfile thread 1 group 5 ('+FRA') size 10g;
+    alter database add logfile thread 1 group 6 ('+FRA') size 10g;
+    alter database add logfile thread 2 group 7 ('+FRA') size 10g;
+    alter database add logfile thread 2 group 8 ('+FRA') size 10g;
 
-    alter system switch all logfile;
+    alter system switch logfile;
     alter database drop logfile group x;
 
     col member format a50
@@ -72,3 +84,16 @@
 
     select inst_id,count(*) from gv$session where username is not null group by inst_id;
 
+**Memory Config**
+
+    show parameter target
+    show parameter sga
+    show parameter db_file_multiblock_read_count
+    
+
+    alter system set sga_max_size=220G scope=spfile;
+    alter system set sga_target=200G scope=spfile;
+
+**MISC**
+
+    SELECT COUNT(*) "USERS" FROM ALL_USERS; // check slob load progress.

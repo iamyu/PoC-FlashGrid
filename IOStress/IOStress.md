@@ -99,7 +99,7 @@
 
     1. Disable Read-Only Cache on all the disks. 
     2. Run Quick SLOB test to find out the right parameter to stree IO for P30, P60, P60S and P80.
-     
+    3. when scale VM, change the SGA size, otherwise, DB will wait for other event object, like buffer, instead of DB file read/write.
     
     
     Identify stress testing parameter by tuning schema, thread/schema and work_unit. monitor disk load with iostat for expected IOPS

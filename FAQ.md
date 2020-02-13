@@ -4,10 +4,10 @@
     A: Yes, the requst can be submitted from https://www.flashgrid.io/skycluster-in-azure-free-trial/
     
     Q: Any problem to access FlashGrid official portal?
-    A: if any troulbes to submit request or launch FlashGrid Launcher, better connect from a enviornment beyond China Great Firewall. Component like reCAPTCHA from FlashGrid office web site cannot work inside China.
+    A: if any troulbes to submit request or launch FlashGrid Launcher, try to connect from a enviornment beyond China Great Firewall. Component like reCAPTCHA from FlashGrid office web site cannot work inside China.
 
     Q: There is not RHEL and FlashGrid image in China Azure Market Place, how can I start the production/trail deployment?
-    A: Please contact FlashGrid to get image VHD and convert it as a VM image in your China Azure subscription. The VHD file is located on global Azure. It is better we have mirror site on China Azure blob service. 
+    A: Please contact FlashGrid to get image VHD and convert it as a VM image in your China Azure subscription. note the vhd may located in global Azure and it takes time to download.
 
     Sample script to convert the vhd to image. Assume the vhd (flashgrid-rhel-os.vhd) is saved in storage account mcsacn2racpoc with container named images.
 
@@ -16,35 +16,14 @@
 
         # Set image configuration. Sample deployment target region is China North 2.
         $imageConfig = New-AzImageConfig -Location 'China North 2';
-        $osDiskVhdUri = "https://mcsacn2racpoc.blob.core.chinacloudapi.cn/images/flashgrid-rhel-os.vhd"
+        $osDiskVhdUri = "https://yourstorageaccountname.blob.core.chinacloudapi.cn/images/flashgrid-rhel-os.vhd"
         Set-AzImageOsDisk -Image $imageConfig -OsType 'Linux' -OsState 'Generalized' -BlobUri $osDiskVhdUri;
 
         # Replace with your image name and target resource group name.
         New-AzImage -Image $imageConfig -ImageName 'YourImageName' -ResourceGroupName 'YourResourceGroup';
 
-    Q: Do i need license for RHEL?
-    A: sudo subscription-manager  list
-
-        +-------------------------------------------+
-        Installed Product Status
-        +-------------------------------------------+
-        Product Name:   dotNET on RHEL (for RHEL Server)
-        Product ID:     317
-        Version:        2.0
-        Arch:           x86_64
-        Status:         Unknown
-        Status Details: 
-        Starts:         
-        Ends:           
-
-        Product Name:   Red Hat Enterprise Linux Server
-        Product ID:     69
-        Version:        7.7
-        Arch:           x86_64
-        Status:         Unknown
-        Status Details: 
-        Starts:         
-        Ends:           
+    Q: Do i need subscription from RHEL and Oracle?
+    A: Yes. The solution from flashgrid is to build the shared storage for ASM, no subscription for RHEL or Oracle are included in the image.
 
 
 **Deployment**
@@ -55,17 +34,8 @@
     Q: Shall we enable Accelerated Networking to pass through host Network?
     A: Accelerated Networking is automatically enabled after deployment.
 
-    Test Image from FlashGrid as following version which should be able to support Accelerated Networking.
-
-        Operating System: Red Hat Enterprise Linux Server 7.7 (Maipo)
-        CPE OS Name: cpe:/o:redhat:enterprise_linux:7.7:GA:server
-        Kernel: Linux 3.10.0-1062.7.1.el7.x86_64
-
-    Q: Max cached and temp storage throughput is higher than VM un-Cached throughput, Does SkyCluster make any usage of the local temp SSD?
-    A: 
-
-    Q: Usable_Capacity = Number_of_Disks_per_Node x Disk_Size (because of mirroring between the nodes)? 
-    A: The total SSD assigned to the cluster cannot be fully used by ASM due to redudant(mirror). So the ASM Usable_Capacity = Number_of_Disks_per_Node x Disk_Size x Node_Count / Redudant_Factor. For the two node cluster, Node_Count = Redudant_Factor = 2. 
+    Q: Max cached and temp storage throughput is higher than VM un-Cached throughput, Does SkyCluster make any usage of the temp SSD?
+    A: No. Temp SSD is not used FlashGrid cluster setup.
 
 **Post-Deployment**
     
@@ -81,27 +51,16 @@
         - TCP port 22 for SSH access
 
     Q: what is the common CLI to verify SkyCluster has been configured properly?
-    A: sudo flashgrid-cluster verify
+    A: sudo flashgrid-cluster verify. A broadcast message will be displayed after cluster setup, follow the suggestion for necessary actions. 
 
-    Q: Time Sync requirement for FlashGrid?
-    A: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/time-sync
-
-        - NTP
-        - Chrony Service 
-
-            chronyc sources -v
-            cat /etc/chrony.conf 
-
-        - Oracle CTSS sync time before DB node, not quorum node
-
-    Q: The deployment is reported as successful but there is not fg-pri virtual NIC on quorum node. Also, there other virtual NIC is created on DB node. is it normal?
-
+    Q: Time Sync requirement for FlashGrid, do i really need a external time source?
+    A: According to https://docs.microsoft.com/en-us/azure/virtual-machines/linux/time-sync, Azure platform should be able to sync the VM time. During the cluster initlization, it will check the time sync status. Tested for no NTP server in the configuration wizard, the deployment failed. 
 
     Q: Does it have IPv6 support?
-
+    A: IPv6 is disabled in the cluster nodes.
 
     Q: How manage disk created by the SkyCluster Launcher.
-    A: Besides the disk added in the ASM, there are another two disk created: 107GiB disk for install Oracle. One 5 GiB Disk attached for Grid usage. 
+    A: Besides the disk added in the ASM, there are another two disk created in my test: 107GiB disk for install Oracle. One 5 GiB Disk attached for GRID DG. 
     
     OS disk
         --------------------------------------------------------------------------------------------------------
@@ -133,37 +92,25 @@
         GRID       Good    AllNodes  NORMAL  10240     9496     0             0          No      Enabled    3/3 
         --------------------------------------------------------------------------------------------------------
 
-**IO Stress Test**
 
-    Q: what is the IO Stack difference w/o ReadLocal?
-    A: 
+    Q: What is the IO Stack difference w/o ReadLocal?
+    A: Have not get answer from Flashgrid.
 
     Q: Max number of Data disk changes alone with the VM size? any best practise/suggest about the disk group?
-    A: 
+    A: when scale up/down the DB node, ensure the small VM size support the same number of disks. FlashGrid does not cover this.
 
     Q: VM Shutdown process/sequence?
-    A: link "https://kb.flashgrid.io/maintenance" does not work.
+    A: follow FlashGrid's online guide to reboot a node or turn off the cluster: https://kb.flashgrid.io/maintenance/maintenance-azure
 
-    Q: How to rename DiskGroup DATA -> P30?
-    A: 
-
+    Q: How to rename DiskGroup name?
+    A: FlashGrid does not provide this option after deployment. 
 
     Q: Do I have to distrubute the storage to node equally? Can i add 1 disk on node 1 and two disk on Node 2 for one DG?
-    A: 
+    A: Yes, it is the requirement for ASM. keep the disk layout same on both node.
 
     Q: Can I use disk size ovre 4T Premium SSD? disk size over 4TB does not support ReadOnly/ReadWrite Cache.
-    A:
+    A: It is not supported/suggested to use NONE cache disk. Tested with P60 & P80, it does work. 
 
-    Q: does is matter for "The number of quorum disks is fewer than the recommended minimum of 1 for this disk group configuration"?
-    A: as the main task is to test IO performance. only two disks are added to the DiskGroup. the group state is Good now. after cluster reboot.
-
-    Q: what is the suggested process for creating DB on P30, P60 and P80 DG for IO Stress Test? situaitons like:
-    
-        - AU size recommend for differnent DG due to disk size?
-        - sperate data file and REDO log to different DG
-        - do i need to manaually config SPA and PGA everytime when scaling?
-    A: 
-
-    Q: Shall we enable SWAP disk. when creating DB, this is warning for SWAP space is too small. by default Azure VM does not create SWAP on Temp disk.
-    A: 
+    Q: Shall we enable SWAP disk. when creating DB, there is warning for SWAP space is too small. by default Azure VM does not create SWAP on Temp disk.
+    A: Does not matter. I ignore the warning and continue.
 

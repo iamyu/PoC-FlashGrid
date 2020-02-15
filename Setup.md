@@ -42,76 +42,67 @@ Facts on China Azure.
 
     Preparation: contact flashgrid to get vhd image and configuration template file. 
     
-   1. Convert VHD as an OS Image in China Azure subscription.
+   1. Convert VHD as an OS Image in China Azure subscription. Check FAQ for a sample PowerShell code.
    2. Modify the configuration file to replace the image with the new created Image resource ID.
    3. Go to https://1910.cloudprov.flashgrid.io/ to upload the modified configuration file and continue the wizard
    4. Before deploy the resource, better to save the configration file for further usage.
    5. Lauch the deployment and broswer goes to China Azure Portal for ARM template deployment. 
    6. Save the JSON template before create resource in Azure.
+   7. Deploy the resource on China Azure.
 
+**Configuration for Each Step**
 
-1. Cluster Info
+  1. Cluster Info
 
-    Cluster Name    Cloud Type    OS         Production or Trial   SSH key 
-    ------------    ----------    ----       ------------------    --------
-    mcracpoc        China         RHEL 7     Trial                   ----
+      Cluster Name    Cloud Type    OS         Production or Trial   SSH key 
+      ------------    ----------    ----       ------------------    --------
+      mcracpoc        China         RHEL 7     Trial                   ----
 
-2. Database Version
+  2. Database Version
 
-3. Oracle Files
+  3. Oracle Files
 
-    Ensure the data is saved in File Share with acceptable performance within China, like China Azure Blob storage https://storageaccountname.blob.core.chinacloudapi.cn/software. SkyCluster Launcher checks file existance only, not MD5. it is YOUR responsibility to verify packages are safe to deploy. For test purpose to just go through the wizard, we can create files with same name so SkyCluster Launcher can continue.
+      Ensure the data is saved in File Share with acceptable performance within China, like China Azure Blob storage https://storageaccountname.blob.core.chinacloudapi.cn/software. SkyCluster Launcher checks file existance only, not MD5. it is YOUR responsibility to verify packages are safe to deploy. For test purpose to just go through the wizard, we can create files with same name so SkyCluster Launcher can continue.
 
-    If PoC environment has no Internet access, setup Service End Point for vNET access.
+      If PoC environment has no Internet access, setup Service End Point for vNET access.
 
-4. Nodes
-   -   Availability Zones or Fault Domains: No AZ, 2 Fault Domains
-   -   Cluster Node: Select based on workload. 
+  4. Nodes
+     -   Availability Zones or Fault Domains: No AZ, 2 Fault Domains
+     -   Cluster Node: Select based on workload. 
 
-5. Storage:
-   - Select storage based on capacity and performance. Large Singl Disk = Higher Performance. Better less than 4TB
+  5. Storage:
+     - Select storage based on capacity and performance. Large Singl Disk = Higher Performance. Better less than 4TB
 
-6. Memory
-   - Automatically configure HugePages - Checked. 
-   - % of System Memory allocated for Databases (SGA+PGA) - 80 (default)
-   - % of the Database Memory allocated for SGA - 60 (default)
+  6. Memory
+     - Automatically configure HugePages - Checked. 
+     - % of System Memory allocated for Databases (SGA+PGA) - 80 (default)
+     - % of the Database Memory allocated for SGA - 60 (default)
 
-7. Listener Ports: 
-   - SCAN listener Port: 1521
-   - Local listener Port: 1522
+  7. Listener Ports: 
+     - SCAN listener Port: 1521
+     - Local listener Port: 1522
 
-8.  Network: 
-   - Create new VNet: Unchecked. Prefer to configure network environment before deploy Oracle RAC. In most case, network topology should has been designed before Oracle RAC. Ensure requird port are allowed in the RAC subnet.
-   - Assign Public IPs to Cluster Nodes: keep it unchecked for secure purpose. Without public IP, nodes can still access requird internet service, like NTP server through default Azure SNAT egress.
+  8.  Network: 
+     - Create new VNet: Unchecked. Prefer to configure network environment before deploy Oracle RAC. In most case, network topology should has been designed before Oracle RAC. Ensure requird port are allowed in the RAC subnet.
+     - Assign Public IPs to Cluster Nodes: keep it unchecked for secure purpose. Without public IP, nodes can still access requird internet service, like NTP server through default Azure SNAT egress.
 
-11. DNS
-    - Inter-Cluster communcation is handled by cluster. 
-    - DNS is required for cluster external communication
+  9.  DNS
+      - Inter-Cluster communcation is handled by cluster. 
+      - DNS is required for cluster external communication
 
-12. Time Zone
+  10. Time Zone
 
-- Time Zone: Asia/Shanghai
-- Sample NTP Servers. make sure to use one, cluster deploy may fail if keep it blank, even though Azure sync the time with host, FlashGrid Cluster manually check this during cluster initilization 
+  - Time Zone: Asia/Shanghai
+  - Sample NTP Servers. make sure to use one, cluster deploy may fail if keep it blank, even though Azure sync the time with host, FlashGrid Cluster manually check this during cluster initilization 
 
-	   server 0.cn.pool.ntp.org
-	   server 1.cn.pool.ntp.org
-	   server 2.cn.pool.ntp.org
-	   server 3.cn.pool.ntp.org
+  	   server 0.cn.pool.ntp.org
+  	   server 1.cn.pool.ntp.org
+  	   server 2.cn.pool.ntp.org
+  	   server 3.cn.pool.ntp.org
 
-11. Alert
-12. Tags
-13. Validate
-14. Launch
+  11. Alert
+  12. Tags
+  13. Validate
+  14. Launch
 
-**Deploy ARM Template**
-
-1. At the end of the SkyCluster Launcher, a cfg file will be saved to keep all the configuration in the wizard. 
-
-2. Launch the deployment process, FlashGrid will launch Azure China Portal for resource deployment. As China Azure does not have required image in MarketPlace, contact FlashGrid directly to get VHD and configure file. 
-
-    a. Convert VHD as an OS Image in China Azure subscription.
-    b. Modify the CNF file to change the image Resource ID we just created.  
-    c. Upload the new CNF file to flashgrid launcher wizard, go through the wizard again to make necessary changes.
-    d. Before deploy the resource, save the configration again for further usage.
-    e. Deploy SkyCluster. It is better to save the JSON template in case any manual changes requires. 
 

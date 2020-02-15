@@ -82,7 +82,7 @@
     **NOTE: **
         - Resize SYSTEM/SYSAUX to prevent SLOB load failure. Authough it set to AUTO EXTEND, table space still used up like below example. 
   
-              TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
+            TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
             ------------------------------ --- ----------- --------------- ------------ ------------ ----------- ------------ --------
             SYSTEM			       YES    32767.98		  2.78		        920	        912.06          99.14	     7.94	    1
             SYSAUX			       YES    32767.98		  1.84		        630	        603             95.71	       27	    4
@@ -98,13 +98,7 @@
  **SLOB Test**
 
     1. Disable Read-Only Cache on all the disks. 
-    2. Run Quick SLOB test to find out the right parameter to stree IO for P30, P60, P60S and P80.
-    3. when scale VM, change the SGA size, otherwise, DB will wait for other event object, like buffer, instead of DB file read/write.
-    
-    
-    Identify stress testing parameter by tuning schema, thread/schema and work_unit. monitor disk load with iostat for expected IOPS
-
-    iostat -x sdc sdd sde sdf sdg sdch sdi sdj sdk sdl sdm sdn sdo sdp sdq sdr 10 20
+    2. Identify stress testing parameter by tuning schema, thread/schema and work_unit. monitor IOPS and Queue Length with IOSTAT
 
 **RESULT**
 
@@ -129,8 +123,3 @@
 
 **Conclusion**
 
-1. Due to Host Read-Only Cache, the total Disk IOPS can exceed limit since the IO does not really goes to storage. 
-
-
-
-2. 

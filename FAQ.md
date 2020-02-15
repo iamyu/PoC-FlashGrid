@@ -37,6 +37,9 @@
     Q: Max cached and temp storage throughput is higher than VM un-Cached throughput, Does SkyCluster make any usage of the temp SSD?
     A: No. Temp SSD is not used FlashGrid cluster setup.
 
+    Q: Can I deploy the cluster with a small size DB node and scale to any other size when necessary.
+    A: In theory, yes, SkyCluster and Azure VM support scale out. Actually, once the availability set is created, the AVset supported VM size has been prefined. For example, if the cluster is created with D8s_v3 DB Node, it can scale up to D and E series VMs. but most like, scale up to M or L series will fail.     
+
 **Post-Deployment**
     
     Q: After deploy the FlashGrid cluster to one subscription. does it support to move to different subscription?

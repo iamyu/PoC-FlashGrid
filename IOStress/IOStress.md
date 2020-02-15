@@ -1,13 +1,13 @@
 **Original Deployment:**
 
     OS Size:
-
-        --------------------------------------------------------------------------------------------------------
-        Name             Size         --------------------------------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------------------------------      
+        Name             Size
+        --------------------------------------------------------------------------------------------------------  
         mcracpoc1        Standard D8s v3 (8 vcpus, 32 GiB memory)
         mcracpoc2        Standard D8s v3 (8 vcpus, 32 GiB memory)
         mcracpocq        Standard DS2 v2 (2 vcpus, 7 GiB memory)
-        --------------------------------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------------------------------  
 
     OS disk
         --------------------------------------------------------------------------------------------------------
@@ -18,7 +18,6 @@
         mcracpocq           32 GiB      Premium SSD                 Not enabled       Read-only
         --------------------------------------------------------------------------------------------------------
 
-    Data disks for DB Node
     Data disks for DB Node
         --------------------------------------------------------------------------------------------------------
         LUN         Name                      Size         Storage account type        Encryption        Host caching
@@ -32,13 +31,13 @@
         6           disks_mcracpoc1_lun6_xxx  512 GiB      Premium SSD                 Not enabled       Read-only
         7           disks_mcracpoc1_lun7_xxx  512 GiB      Premium SSD                 Not enabled       Read-only
         8           mcracpoc1-ssd-p30x1       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        9           mcracpoc1-ssd-p60x2       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        10          mcracpoc1-ssd-p60x3       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        11          mcracpoc1-ssd-p60x4       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        12          mcracpoc1-ssd-p60x5       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        13          mcracpoc1-ssd-p60x6       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        14          mcracpoc1-ssd-p60x7       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
-        15          mcracpoc1-ssd-p60x8       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        9           mcracpoc1-ssd-p30x2       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        10          mcracpoc1-ssd-p30x3       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        11          mcracpoc1-ssd-p30x4       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        12          mcracpoc1-ssd-p30x5       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        13          mcracpoc1-ssd-p30x6       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        14          mcracpoc1-ssd-p30x7       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
+        15          mcracpoc1-ssd-p30x8       1024 GiB     Premium SSD  -> P60S        Not enabled       Read-only
         ----------------------------------------------------------------------------------------------------------
     
     ASM DG:
@@ -72,27 +71,18 @@
         P60SDB      8KB     IOPS                P60S        2048GiB     24GiB       24GiB       256GiB      10GiB*4(P60S)
         -----------------------------------------------------------------------------------------------------------
 
-        srvctl status database -thishome
-        srvctl start database -db p30db
-        sqlplus system/7xZfhC47nL3tB9rF@p30db
-        ALTER TABLESPACE SYSTEM ADD DATAFILE '+DATA' SIZE 24G;
-        ALTER TABLESPACE SYSAUX ADD DATAFILE '+DATA' SIZE 24G;
-        CREATE BIGFILE TABLESPACE IOPS DATAFILE '+DATA' SIZE 768G AUTOEXTEND ON NEXT 8G MAXSIZE UNLIMITED;
+
 
     **NOTE: **
         - Resize SYSTEM/SYSAUX to prevent SLOB load failure. Authough it set to AUTO EXTEND, table space still used up like below example. 
   
-            TABLESPACE_NAME 	   AUT      MAX_TS_SIZE MAX_TS_PCT_USED CURR_TS_SIZE USED_TS_SIZE TS_PCT_USED FREE_TS_SIZE TS_PCT_FREE
-            ------------------------------ --- ----------- --------------- ------------ ------------ ----------- ------------ --------
-            SYSTEM			       YES    32767.98		  2.78		        920	        912.06          99.14	     7.94	    1
-            SYSAUX			       YES    32767.98		  1.84		        630	        603             95.71	       27	    4
-            IOPS			       YES    33554432		   .62	            217728      207306.19       95.21	 10421.81	    5
-            UNDOTBS1		       YES    32767.98		   .09		        345	        28.25	        8.19	   316.75	   92
-            UNDOTBS2		       YES    32767.98		   .08		        75	        26.56           35.42	    48.44	   65
-            USERS			       YES    32767.98		   .01		        5	        2.69            53.75	     2.31	   46
-            TEMP			       YES    32767.98		     0	            7529	    0	            0	        7529	  100
+            TABLESPACE_NAME    AUT    MAX_TS_SIZE    CURR_TS_SIZE    USED_TS_SIZE    TS_PCT_USED    FREE_TS_SIZE    TS_PCT_FREE
+            ---------------    ---    -----------    ------------    ------------    -----------    ------------    ------------
+            SYSTEM             YES    32767.98       920             912.06          99.14          7.94            1
+            SYSAUX             YES    32767.98       630             603             95.71          27              4
 
-        - Set REDO logs to using FRA Disk Group to avoid any IO impact on Database DG.
+        - Set REDO logs to a dedicate Disk Group to avoid any IO impact on Database DG. 
+        - For M series, Accelerate Writer is suggested to enable on REDO log disk, not DB data disk. 
 
 
  **SLOB Test**
@@ -100,16 +90,7 @@
     1. Disable Read-Only Cache on all the disks. 
     2. Identify stress testing parameter by tuning schema, thread/schema and work_unit. monitor IOPS and Queue Length with IOSTAT
 
-**RESULT**
-
-    Data Disks MATRIX
-        --------------------------------------------------------------------------------------------------------
-        SKU     Disk size in GiB        IOPS per disk       Throughput          Latency
-        --------------------------------------------------------------------------------------------------------
-        P30      1,024                   5,000              200                 
-        P60      8,192                  16,000              500
-        P80     32,767                  20,000              900
-        --------------------------------------------------------------------------------------------------------
+**AWR report**
 
     For each individual AWR report, saved in IOStress folder. Name conversion as following: 
 
@@ -122,4 +103,12 @@
         |-----------------------------------AWR Report Tag     
 
 **Conclusion**
+
+    1. FlashGrid SkyCluster is able to provide a RAC environment on cloud with high IO throughput.
+   
+    2. We can put the Premium Data Disk IOPS to its limitation without impact Oracle OS Stability
+   
+    3. Disk with READ-ONLY CACHE is helpful to improve the IO performance. Be careful to choose the Disk & VM size. 
+   
+    4. Use disks under 4T can be a good option if it can provide enough capacity.
 

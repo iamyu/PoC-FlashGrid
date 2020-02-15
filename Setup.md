@@ -95,10 +95,10 @@ Facts on China Azure.
   - Time Zone: Asia/Shanghai
   - Sample NTP Servers. make sure to use one, cluster deploy may fail if keep it blank, even though Azure sync the time with host, FlashGrid Cluster manually check this during cluster initilization 
 
-  	   server 0.cn.pool.ntp.org
-  	   server 1.cn.pool.ntp.org
-  	   server 2.cn.pool.ntp.org
-  	   server 3.cn.pool.ntp.org
+  	   server 0.cn.pool.ntp.org  
+  	   server 1.cn.pool.ntp.org  
+  	   server 2.cn.pool.ntp.org  
+  	   server 3.cn.pool.ntp.org  
 
   11. Alert
   12. Tags

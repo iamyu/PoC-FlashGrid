@@ -1,4 +1,4 @@
-**Get current Table space usage. **
+**Query TableSpace **
 
     set pages 999
     set lines 400
@@ -42,6 +42,14 @@
     WHERE fs.tablespace_name (+) = df.tablespace_name
     GROUP BY df.tablespace_name, df.bytes, df.maxbytes
     ORDER BY 4 DESC;
+
+**change Tablespace**
+    srvctl status database -thishome
+    srvctl start database -db p30db
+    sqlplus system/7xZfhC47nL3tB9rF@p30db
+    ALTER TABLESPACE SYSTEM ADD DATAFILE '+P60S' SIZE 24G;
+    ALTER TABLESPACE SYSAUX ADD DATAFILE '+P60S' SIZE 24G;
+    CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P60S' SIZE 4096G AUTOEXTEND ON NEXT 8G MAXSIZE UNLIMITED;
 
 **DB files**
 
@@ -89,11 +97,20 @@
     show parameter target
     show parameter sga
     show parameter db_file_multiblock_read_count
-    
 
-    alter system set sga_max_size=220G scope=spfile;
-    alter system set sga_target=200G scope=spfile;
+    alter system set sga_max_size=256G scope=spfile;
+    alter system set sga_target=128G scope=spfile;
 
 **MISC**
 
     SELECT COUNT(*) "USERS" FROM ALL_USERS; // check slob load progress.
+
+**RECOVER**
+
+    export ORACLE_SID=racdb1
+    sqlplus / as sysdba
+    create pfile='/tmp/p60s.ora' from spfile='+p60s/p60sdb/parameterfile/spfile.258.1031676779';
+
+    # modify /tmp/p60s.ora to correct wrong configuration
+    create spfile='+p60s/p60sdb/parameterfile/spfile.20200214' from pfile='/tmp/p60s.ora';
+    startup spfile='+p60s/p60sdb/parameterfile/spfile.20200214'

@@ -15,24 +15,24 @@ Facts on China Azure.
 
 - Database node:  
 
-    VM Size    vCore    RAM           Max IOPS    MAX Throughput    Max Disks    Max Network Bandwidth  
-    ----       ----     --------      --------    ---------------   ----------   ----------------------
-    D8s v3     8        32 GiB        12800       192MB             16           8000 Mbps
-    E32s v3    32       256 GiB       51200       768MB             32           30000 Mbps
-    M64        64       1024 GiB      40000       1000MB            64           16000 Mbps
+        VM Size    vCore    RAM           Max IOPS    MAX Throughput    Max Disks    Max Network Bandwidth  
+        ----       ----     --------      --------    ---------------   ----------   ----------------------
+        D8s v3     8        32 GiB        12800       192MB             16           8000 Mbps
+        E32s v3    32       256 GiB       51200       768MB             32           30000 Mbps
+        M64        64       1024 GiB      40000       1000MB            64           16000 Mbps
 
 
 - Quorum node
 
-    VM Size    vCore    RAM           Max IOPS    MAX Throughput    Max Disks    Max Network Bandwidth  
-    ----       ----     --------      --------    ---------------   ----------   ----------------------
-    D2s v3      2       8 GiB         3200       48MB              4            1000Mbps
+        VM Size    vCore    RAM           Max IOPS    MAX Throughput    Max Disks    Max Network Bandwidth  
+        ----       ----     --------      --------    ---------------   ----------   ----------------------
+        D2s v3      2       8 GiB         3200       48MB              4            1000Mbps
 
 - Software
 
-    OS          Oracle      FlashGrid 
-    -------     --------    -----------
-    RHEL 7      19.2        
+        OS          Oracle      FlashGrid 
+        -------     --------    -----------
+        RHEL 7      19.2        
 
 - Architecture
 
@@ -54,9 +54,9 @@ Facts on China Azure.
 
   1. Cluster Info
 
-      Cluster Name    Cloud Type    OS         Production or Trial   SSH key 
-      ------------    ----------    ----       ------------------    --------
-      mcracpoc        China         RHEL 7     Trial                   ----
+            Cluster Name    Cloud Type    OS         Production or Trial   SSH key 
+            ------------    ----------    ----       ------------------    --------
+            mcracpoc        China         RHEL 7     Trial                   ....
 
   2. Database Version
 

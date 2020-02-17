@@ -104,11 +104,35 @@
 
 **Conclusion**
 
-    1. FlashGrid SkyCluster is able to provide a RAC environment on cloud with high IO throughput.
-   
-    2. We can put the Premium Data Disk IOPS to its limitation without impact Oracle OS Stability
-   
-    3. Disk with READ-ONLY CACHE is helpful to improve the IO performance. Be careful to choose the Disk & VM size. 
-   
-    4. Use disks under 4T can be a good option if it can provide enough capacity.
+
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+| ----    |----      |----  |----  |---- |----       | ----  | ----        |----        |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+| E32v3   | 51.2K/64K|P30   |  5K  |  2  |  10K      | NONE  |  8039       |  4.2M      |-    |-    |-     |-     |-     |-   |-   |73.1|20.9|2.8  |2.4  |0.8  |0.0   |
+| E32v3   | 51.2K/64K|P30   |  5K  |  2  |  10K      | READ  |  9215       |  4.8M      |-    |-    |-     |0.3   |13.2  |3.7 |0.6 |64.5|12.9|1.9  |2.1  |0.9  |0.0   |
+| E32v3   | 51.2K/64K|P30   |  5K  | 16  |  80K      | NONE  |   61K       |  6.2M      |-    |-    |-     |-     |-     |-   |-   |73.2|18.1|3.7  |3.8  |1.1  |0.0   |
+| E32v3   | 51.2K/64K|P30   |  5K  | 16  |  80K      | READ  |   44K       |  4.4M      |-    |-    |-     |0.3   |8.8   |3.9 |1.5 |61.8|19.8|2.1  |1.4  |0.4  |0.0   |
+| E32v3   | 51.2K/64K|P60   | 16K  |  2  |  32K      | NONE  |   25K       | 13.3M      |-    |-    |-     |-     |-     |-   |-   |90.1|4.9 |2.5  |2.2  |0.3  |0.0   |
+| E32v3   | 51.2K/64K|P80   | 20K  |  2  |  40K      | NONE  |   33K       |  5.5M      |-    |-    |-     |-     |-     |-   |-   |60.5|23.4|4.5  |9.4  |2.2  |0.0   |
+|         |          |      |      |     |           |       |             |            |     |     |      |      |      |    |    |    |    |     |     |     |      |
+| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |   125K      | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
+| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |   107K      | 33.8M      |0.0  |0.0  | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+
+    awr_p60x2_e32s_s128_t1_wu4      Caching     IOPS        P-Reads/sec    P-Writes/sec     
+    ---------------------------     ---------   --------    -----------    -------------                   
+    NODE1                           NONE        12,096      10,470.65	    1,625.94	                     	                   
+    NODE2                           NONE        13,009      11,226.43	    1,782.84	                                      	
+    
+    RAC                             Waits       ------------------------------------   % of Total Waits  --------------------------------------------------
+    ---------------------------     -----       <32us   <64us   <128us	<256us  <512us  <1ms    <2ms    <4ms    <8ms    <16ms   <32ms   <64ms   <128ms	
+    DB file sequential read         13.3M         	 	 	 	 	 	                        0.0     90.1	4.9	    2.5	    2.2	    0.3	    0.0
+    DB db file parallel write       152.1K       0.5	4.1	    4.1	    9.4	    11.9    17.8	22.6    19.2	5.4	    3.0	    1.8	    0.2	    0.0
+
+
+1. FlashGrid SkyCluster is able to provide a RAC environment on cloud with high IO throughput.
+2. We can put the Premium Data Disk IOPS to its limitation without impact Oracle OS Stability
+3. Disk with READ-ONLY CACHE is helpful to improve the IO performance. Be careful to choose the Disk & VM size.
+4. Use disks under 4T can be a good option if it can provide enough capacity. 
+5. As VM Cached IO throughput limitation is much higher than the none cached limit, by choosing P-SSD smaller than 4T, we can also choose a small VM size to support high Cached IO throughput. 
 

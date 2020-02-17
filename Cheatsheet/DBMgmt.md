@@ -45,11 +45,11 @@
 
 **change Tablespace**
     srvctl status database -thishome
-    srvctl start database -db p30db
+    srvctl start database -db p30sdb
     sqlplus system/7xZfhC47nL3tB9rF@p30db
-    ALTER TABLESPACE SYSTEM ADD DATAFILE '+P60S' SIZE 24G;
-    ALTER TABLESPACE SYSAUX ADD DATAFILE '+P60S' SIZE 24G;
-    CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P60S' SIZE 4096G AUTOEXTEND ON NEXT 8G MAXSIZE UNLIMITED;
+    ALTER TABLESPACE SYSTEM ADD DATAFILE '+P30S' SIZE 24G;
+    ALTER TABLESPACE SYSAUX ADD DATAFILE '+P30S' SIZE 24G;
+    CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P30S' SIZE 1024G AUTOEXTEND ON NEXT 8G MAXSIZE UNLIMITED;
 
 **DB files**
 
@@ -73,13 +73,13 @@
 
     column group# format 99999;
     column status format a10;
-    column mb format 99999;
+    column mb format 9999999;
     select group#, thread#, status, bytes/1024/1024 mb from v$log;
 
-    alter database add logfile thread 1 group 5 ('+FRA') size 10g;
-    alter database add logfile thread 1 group 6 ('+FRA') size 10g;
-    alter database add logfile thread 2 group 7 ('+FRA') size 10g;
-    alter database add logfile thread 2 group 8 ('+FRA') size 10g;
+    alter database add logfile thread 1 group 5 ('+FRA') size 50g;
+    alter database add logfile thread 1 group 6 ('+FRA') size 50g;
+    alter database add logfile thread 2 group 7 ('+FRA') size 50g;
+    alter database add logfile thread 2 group 8 ('+FRA') size 50g;
 
     alter system switch logfile;
     alter database drop logfile group x;
@@ -98,8 +98,8 @@
     show parameter sga
     show parameter db_file_multiblock_read_count
 
-    alter system set sga_max_size=256G scope=spfile;
-    alter system set sga_target=128G scope=spfile;
+    alter system set sga_max_size=20G scope=spfile;
+    alter system set sga_target=3G scope=spfile;
 
 **MISC**
 
@@ -114,3 +114,33 @@
     # modify /tmp/p60s.ora to correct wrong configuration
     create spfile='+p60s/p60sdb/parameterfile/spfile.20200214' from pfile='/tmp/p60s.ora';
     startup spfile='+p60s/p60sdb/parameterfile/spfile.20200214'
+
+**PROCESSES/SESSIONS**
+
+    show parameter processes;
+    show parameter sessions ;
+    
+    select count(*) from v$process;
+    select count(*) from v$session;
+    select count(*) from v$session where status='ACTIVE';
+    select sid,serial#,username,program,machine,status from v$session;
+    select value from v$parameter where name = 'processes';
+
+    alter system set processes = 1024 scope = spfile;
+    alter system set sessions = 4096 scope=spfile ;
+    shutdown immediate;
+    startup;
+
+**Calibrate_IO**
+
+    SET SERVEROUTPUT ON;
+    DECLARE
+    lat INTEGER;
+    iops INTEGER;
+    mbps INTEGER;
+    BEGIN DBMS_RESOURCE_MANAGER.CALIBRATE_IO (32, 10, iops, mbps, lat);
+    DBMS_OUTPUT.PUT_LINE ('Max_IOPS = ' || iops);
+    DBMS_OUTPUT.PUT_LINE ('Latency = ' || lat);
+    DBMS_OUTPUT.PUT_LINE ('Max_MB/s = ' || mbps);
+    end;
+    /

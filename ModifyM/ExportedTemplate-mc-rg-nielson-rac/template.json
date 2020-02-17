@@ -1,0 +1,197 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "extensions_fgsetup_storageAccountName": {
+            "type": "SecureString"
+        },
+        "extensions_fgsetup_storageAccountKey": {
+            "type": "SecureString"
+        },
+        "extensions_fgsetup_commandToExecute": {
+            "type": "SecureString"
+        },
+        "virtualMachines_mcracpocq_vm_name": {
+            "defaultValue": "mcracpocq-vm",
+            "type": "String"
+        },
+        "availabilitySets_MCRACPOC_AS_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Compute/availabilitySets/MCRACPOC-AS",
+            "type": "String"
+        },
+        "images_flashgrid_rhel_os_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-core/providers/Microsoft.Compute/images/flashgrid-rhel-os",
+            "type": "String"
+        },
+        "disks_mcracpocq_vm_root_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/MC-RG-NIELSON-RAC/providers/Microsoft.Compute/disks/mcracpocq-vm-root",
+            "type": "String"
+        },
+        "disks_disks_mcracpocq_lun3_5uiy72rhjdfyy_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Compute/disks/disks_mcracpocq_lun3_5uiy72rhjdfyy",
+            "type": "String"
+        },
+        "disks_disks_mcracpocq_lun2_5uiy72rhjdfyy_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Compute/disks/disks_mcracpocq_lun2_5uiy72rhjdfyy",
+            "type": "String"
+        },
+        "disks_disks_mcracpocq_lun1_5uiy72rhjdfyy_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Compute/disks/disks_mcracpocq_lun1_5uiy72rhjdfyy",
+            "type": "String"
+        },
+        "disks_disks_mcracpocq_lun4_5uiy72rhjdfyy_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Compute/disks/disks_mcracpocq_lun4_5uiy72rhjdfyy",
+            "type": "String"
+        },
+        "networkInterfaces_mcracpocq_nic1_externalid": {
+            "defaultValue": "/subscriptions/8511afaf-5242-4d2d-a7b3-298f83c8abe2/resourceGroups/mc-rg-nielson-rac/providers/Microsoft.Network/networkInterfaces/mcracpocq-nic1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-03-01",
+            "name": "[parameters('virtualMachines_mcracpocq_vm_name')]",
+            "location": "chinanorth2",
+            "tags": {
+                "cluster": "mcracpoc"
+            },
+            "identity": {
+                "principalId": "169a1711-bb62-44f6-90de-fe6e1b350a2d",
+                "tenantId": "99d86385-9b07-4221-9a3a-facb274186b5",
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[parameters('availabilitySets_MCRACPOC_AS_externalid')]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "Standard_M8ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[parameters('images_flashgrid_rhel_os_externalid')]"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_mcracpocq_vm_name'), '-root')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadOnly",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('disks_mcracpocq_vm_root_externalid')]"
+                        },
+                        "diskSizeGB": 32
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 3,
+                            "name": "disks_mcracpocq_lun3_5uiy72rhjdfyy",
+                            "createOption": "Attach",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[parameters('disks_disks_mcracpocq_lun3_5uiy72rhjdfyy_externalid')]"
+                            },
+                            "diskSizeGB": 1,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 2,
+                            "name": "disks_mcracpocq_lun2_5uiy72rhjdfyy",
+                            "createOption": "Attach",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[parameters('disks_disks_mcracpocq_lun2_5uiy72rhjdfyy_externalid')]"
+                            },
+                            "diskSizeGB": 1,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 1,
+                            "name": "disks_mcracpocq_lun1_5uiy72rhjdfyy",
+                            "createOption": "Attach",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[parameters('disks_disks_mcracpocq_lun1_5uiy72rhjdfyy_externalid')]"
+                            },
+                            "diskSizeGB": 1,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 4,
+                            "name": "disks_mcracpocq_lun4_5uiy72rhjdfyy",
+                            "createOption": "Attach",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[parameters('disks_disks_mcracpocq_lun4_5uiy72rhjdfyy_externalid')]"
+                            },
+                            "diskSizeGB": 1,
+                            "toBeDetached": false
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "mcracpocq.example.com",
+                    "adminUsername": "az-admin",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/az-admin/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApeQ/FiCi9/6OwWU/FX7dfhk0j4VOVrsb6R8w5U2go9shzShkIF1cTp32MNfks+pyO0RaDm2uo0YnIM2bU2xNZI0rxTRg/tX5e3t14qPQsc/n+uLqTULSQFTtCADgb25gaTYLHiK90ZJ7BXpOnyaK8TgM+LToyMDYN4oi/UTinMJs3FgXiZBQ8BdJsCCgWfG+gb6UkZQf/qOOJyYab4ZJUjZavL8xRVrUuhfgBtfp7lRDUrICQKtmnP1I8abO3xlfdI0lbtGhY0OiH7w+eQOr6NNwM3OCderOjK1XgBqx2NMBL0mzi55X0pZOogQf26lyI6RDn6QOvAl2fQyAT3u9Tw=="
+                                }
+                            ]
+                        }
+                    },
+                    "secrets": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_mcracpocq_nic1_externalid')]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "https://5uiy72rhjdfyysa.blob.core.chinacloudapi.cn/"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('virtualMachines_mcracpocq_vm_name'), '/fgsetup')]",
+            "location": "chinanorth2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_mcracpocq_vm_name'))]"
+            ],
+            "tags": {
+                "cluster": "mcracpoc"
+            },
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": []
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[parameters('extensions_fgsetup_storageAccountName')]",
+                    "storageAccountKey": "[parameters('extensions_fgsetup_storageAccountKey')]",
+                    "commandToExecute": "[parameters('extensions_fgsetup_commandToExecute')]"
+                }
+            }
+        }
+    ]
+}

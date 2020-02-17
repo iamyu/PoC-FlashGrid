@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "extensions_fgsetup_storageAccountName": {
+            "value": null
+        },
+        "extensions_fgsetup_storageAccountKey": {
+            "value": null
+        },
+        "extensions_fgsetup_commandToExecute": {
+            "value": null
+        },
+        "virtualMachines_mcracpocq_vm_name": {
+            "value": null
+        },
+        "availabilitySets_MCRACPOC_AS_externalid": {
+            "value": null
+        },
+        "images_flashgrid_rhel_os_externalid": {
+            "value": null
+        },
+        "disks_mcracpocq_vm_root_externalid": {
+            "value": null
+        },
+        "disks_disks_mcracpocq_lun3_5uiy72rhjdfyy_externalid": {
+            "value": null
+        },
+        "disks_disks_mcracpocq_lun2_5uiy72rhjdfyy_externalid": {
+            "value": null
+        },
+        "disks_disks_mcracpocq_lun1_5uiy72rhjdfyy_externalid": {
+            "value": null
+        },
+        "disks_disks_mcracpocq_lun4_5uiy72rhjdfyy_externalid": {
+            "value": null
+        },
+        "networkInterfaces_mcracpocq_nic1_externalid": {
+            "value": null
+        }
+    }
+}

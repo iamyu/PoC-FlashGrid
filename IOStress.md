@@ -97,9 +97,10 @@
         |-----------------------------------AWR Report Tag     
 
 **Metrics**
+
 Deployment 1: 
 - Test with Ds Es vms. This round of test focus on single disk performance with small active set (100Gb)
-* For E series VM test, use various SLOB parameter to stress IO to 80-90% utilization except marked with *. This is a smaple data for 50% utilization from comparasion.
+- For E series VM test, use various SLOB parameter to stress IO to 80-90% utilization except marked with *. This is a smaple data for 50% utilization from comparasion.
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
 | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |

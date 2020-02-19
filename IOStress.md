@@ -129,7 +129,7 @@
     - Tested P30S DB without READ-ONLY cache and did not push to IOPS limitation. Over 90% DB file sequencial read completed in 2-4ms which is similar with Ds & Es. 
     - Write Accelerate enabeld on REDO log Disk Group, not on DB file Disk Group. 
 
-### Test 1: DB Node Host Cache > 65GiB Active Dataset > 3GiB SGA
+### Test 1: DB Node Host Cache >> 65GiB Active Dataset > 3GiB SGA
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
@@ -144,7 +144,7 @@
       - Over 50% completed less than 512us. less than 20% over 2ms.
       - Write Accelarate make it even better. 50% less than 256us, 95% completed in 1ms. 
 
-### Test 2: DB Node Host Cache (1024GiB x 2 Nodes) = 2048GiB Active Dataset (SCALE=2GiB, SCHEMA_NUM = 1024) > 40GiB SGA
+### Test 2: Host Cache = Active Dataset >> 40GiB SGA
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
 | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
@@ -155,16 +155,14 @@
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
-### Test 3: 2048GiB Active Dataset (SCALE=4GiB, SCHEMA_NUM = 768) > DB Node Host Cache (1024GiB x 2 Nodes) > 40GiB SGA
+### Test 3: 2048GiB Active Dataset > DB Node Host Cache >> 40GiB SGA
 
 
-# Conclusion: 
+# Learning: 
 
-
-
-1. FlashGrid SkyCluster is able to provide a RAC environment on cloud with high IO throughput.
-2. We can put the Premium Data Disk IOPS to its limitation without impact Oracle OS Stability
-3. Disk with READ-ONLY CACHE is helpful to improve the IO performance. Be careful to choose the Disk & VM size.
-4. Use disks under 4T can be a good option if it can provide enough capacity. 
-5. As VM Cached IO throughput limitation is much higher than the none cached limit, by choosing P-SSD smaller than 4T, we can also choose a small VM size to support high Cached IO throughput. 
-
+- FlashGrid SkyCluster is able to support Oracle RAC on cloud with high IO throughput.
+- Push the Premium Data Disk IOPS to limitation does not impact Oracle OS Stability
+- Disk with READ-ONLY CACHE is helpful to improve the IO performance. 
+- Without U-SSD in China, alterntive solution to use P-SSD with cache.
+- Precise calculate workload and data volume before select Disk/VM size. 
+- Use disks under 4T can be a good option, especailly for RAC, if it can provide required capacity. 

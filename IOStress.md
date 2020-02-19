@@ -1,6 +1,6 @@
 # PoC environment:
 
-    OS Size:
+    VM Size:
         --------------------------------------------------------------------------------------------------------      
         Name             Deployment 1               Deployment 2 
         --------------------------------------------------------------------------------------------------------  
@@ -8,7 +8,7 @@
         mcracpoc2        Standard D8s               Standard M64s 
         mcracpocq        Standard DS2               Standard M8*
         --------------------------------------------------------------------------------------------------------  
-        * Manually move quorum node in Deployment 2 to another availability set and reset to D4s cost saving.
+        * Manually move M8 quorum node to another availability set and resize to D4s for cost saving.
 
     OS disk
         --------------------------------------------------------------------------------------------------------
@@ -43,7 +43,6 @@
         P60SFRA    Good    AllNodes  NORMAL  2097152   1687104   Enabled    None    P30 x 1  x 2 nodes
         ---------------------------------------------------------------------------------------------------------
 
-
     **NOTE:**
         - Azure only enable Read-Only disk cache for disk less than 4TB. FlashGrid only support disks with READ-ONLY cache.
         - P60 & P80 disks are added manually to ASM after cluster deployed. 
@@ -71,8 +70,9 @@
         -----------------------------------------------------------------------------------------------------------
 
     **NOTE: **
-        - Resize SYSTEM/SYSAUX to 24GB prevent SLOB load failure. Authough it set to AUTO EXTEND, table space still used up which cause slob load failure 
-        - Set REDO logs to a dedicate Disk Group (FRA) to avoid any IO impact on Database DG. 
+        - Resize SYSTEM/SYSAUX to 24GB. Authough it set to AUTO EXTEND, tablespace still used up which cause slob load failure 
+        - Set REDO logs to a dedicate Disk Group (FRA) to avoid IO impact on Database DG. 
+        - Locating REDO log in different DG is necessary as Write Accelerate suggested on REDO log only, not on DB file.
         - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace as below.
 
 ![SLOB Load](ScreenShot/SLOB_Load_8TB_P60_DiskIO.jpg)
@@ -96,9 +96,9 @@
 
 # Metrics
 
-## eployment 1: 
+## Dployment 1: 
     
-    - Test with Ds Es vms. This round of test focus on single disk performance with small active set (100GB-500GB)
+    - Test with Ds Es VMs. This round of test focus on single disk performance with small active set (100GB-500GB)
     - Use various SLOB parameter to stress IO to 80-90% utilization except marked with *. This is a smaple data for 50% utilization from comparasion.
     - With host READ-ONLY cache enabled, IO latency was improved but with limited level due to host cache size.
 
@@ -120,12 +120,12 @@
 
 ### Test 1: DB Node Host Cache > 65GiB Active Dataset > 3GiB SGA
 
-    | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-    | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-    | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
-    | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
-    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
-    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
+| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 

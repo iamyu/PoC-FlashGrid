@@ -43,13 +43,37 @@
     GROUP BY df.tablespace_name, df.bytes, df.maxbytes
     ORDER BY 4 DESC;
 
+
+    SELECT dt.tablespace_name tablespace_name,
+    SUBSTR(ddf.file_name,0, instr(ddf.file_name, '/', -1, 1) - 1) AS placement_directory,
+    SUBSTR(ddf.file_name, instr(ddf.file_name, '/',   -1, 1) + 1) AS file_name,
+    ddf.bytes                                         /1024/1024  AS mb,
+    ddf.autoextensible,
+    DECODE (dt.bigfile,'NO','SMALL','YES','BIG') AS BIG_SMALL_FILE,
+    dt.block_size block_size
+    FROM
+    (SELECT tablespace_name, file_name, bytes,autoextensible FROM dba_data_files
+    UNION
+     SELECT tablespace_name, file_name, bytes,autoextensible FROM dba_temp_files
+    ) ddf,
+    (SELECT tablespace_name, block_size,bigfile FROM dba_tablespaces
+    ) dt
+    WHERE dt.tablespace_name = ddf.tablespace_name
+    AND dt.tablespace_name   = 'TEMP';
+
+
+
 **change Tablespace**
     srvctl status database -thishome
     srvctl start database -db p30sdb
     sqlplus system/7xZfhC47nL3tB9rF@p30db
     ALTER TABLESPACE SYSTEM ADD DATAFILE '+P30S' SIZE 24G;
     ALTER TABLESPACE SYSAUX ADD DATAFILE '+P30S' SIZE 24G;
-    CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P30S' SIZE 1024G AUTOEXTEND ON NEXT 8G MAXSIZE UNLIMITED;
+    ALTER TABLESPACE TEMP add tempfile '+P30S' size 31G REUSE AUTOEXTEND ON NEXT 16G MAXSIZE UNLIMITED;
+
+    CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P30S' SIZE 1024G AUTOEXTEND AUTOEXTEND NEXT 8G MAXSIZE UNLIMITED;
+
+
 
 **DB files**
 
@@ -98,12 +122,15 @@
     show parameter sga
     show parameter db_file_multiblock_read_count
 
-    alter system set sga_max_size=20G scope=spfile;
+    alter system set sga_max_size=200G scope=spfile;
+    alter system set sga_target=200G scope=spfile;
+    alter system set sga_target=40G scope=spfile;
     alter system set sga_target=3G scope=spfile;
+
 
 **MISC**
 
-    SELECT COUNT(*) "USERS" FROM ALL_USERS; // check slob load progress.
+    select UserName, CREATED from all_users where UPPER(USERNAME) like 'USER%'; // check slob load progress.
 
 **RECOVER**
 

@@ -81,12 +81,13 @@
         -----------------------------------------------------------------------------------------------------------
 
     **NOTE: **
-        - Resize SYSTEM/SYSAUX to 24GB. Authough it set to AUTO EXTEND, tablespace still used up which cause slob load failure 
+        - Resize SYSTEM/SYSAUX to 24GB. Authough it set to AUTO EXTEND, tablespace still used up which cause slob load failure.
+        - Add additional temp file to TEMP tablespace. When loading large data volume, Default 32GiB temp file could be used up. 
         - Set REDO logs to a dedicate Disk Group (FRA) to avoid IO impact on Database DG. 
         - Locating REDO log in different DG is necessary as Write Accelerate suggested on REDO log only, not on DB file.
         - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace as below.
 
-![SLOB Load](ScreenShot/SLOB_Load_8TB_P60_DiskIO.jpg)
+![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg)
 
 # SLOB Test
 
@@ -129,14 +130,13 @@
     - Tested P30S DB without READ-ONLY cache and did not push to IOPS limitation. Over 90% DB file sequencial read completed in 2-4ms which is similar with Ds & Es. 
     - Write Accelerate enabeld on REDO log Disk Group, not on DB file Disk Group. 
 
-### Test 1: DB Node Host Cache >> 65GiB Active Dataset > 3GiB SGA
+### Test 1: RAC Host Cache >> 65GiB Active Dataset > 3GiB SGA
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6 |11.4 |4.1  |0.8  |2.0  |0.1  |0.0  |0.0   |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7  |1.0  |4.0  |0.4  |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0  |0.0  |0.0  |0.0  |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0  |0.0  |0.0  |0.0  |0.0  |0.0  |0.0  |0.0   |
+
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
@@ -144,7 +144,7 @@
       - Over 50% completed less than 512us. less than 20% over 2ms.
       - Write Accelarate make it even better. 50% less than 256us, 95% completed in 1ms. 
 
-### Test 2: Host Cache = Active Dataset >> 40GiB SGA
+### Test 2: RAC Host Cache = Active Dataset >> 40GiB SGA
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
 | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
@@ -153,9 +153,11 @@
 | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
 | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
 
+    * M64: 1228GiB * 2 = 8GiB * 307; M128: 2456 * 2 = 8GiB * 614
+
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
-### Test 3: 2048GiB Active Dataset > DB Node Host Cache >> 40GiB SGA
+### Test 3: Active Dataset > RAC Host Cache >> 40GiB SGA
 
 
 # Learning: 
@@ -163,6 +165,6 @@
 - FlashGrid SkyCluster is able to support Oracle RAC on cloud with high IO throughput.
 - Push the Premium Data Disk IOPS to limitation does not impact Oracle OS Stability
 - Disk with READ-ONLY CACHE is helpful to improve the IO performance. 
-- Without U-SSD in China, alterntive solution to use P-SSD with cache.
+- Without U-SSD in China, alterntive solution to use P-SSD with cache and Write Accelerate.
 - Precise calculate workload and data volume before select Disk/VM size. 
 - Use disks under 4T can be a good option, especailly for RAC, if it can provide required capacity. 

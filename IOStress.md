@@ -1,4 +1,4 @@
-**Original Deployment:**
+# PoC environment:
 
     OS Size:
         --------------------------------------------------------------------------------------------------------      
@@ -50,7 +50,7 @@
         - FlashGrid reported OS issue when using NONE Caching disk for large IOPS. Did not experience this problem during Stress test.
         - Use NONE cached disk is not recommended/supported by FlashGrid for the time being (Feb 2020)
   
-**Create Oracle DB**
+# Oracle DB
 
     Deployment 1 Test DB:
         -----------------------------------------------------------------------------------------------------------
@@ -77,16 +77,14 @@
 
 ![SLOB Load](ScreenShot/SLOB_Load_8TB_P60_DiskIO.jpg)
 
- **SLOB Test**
+# SLOB Test
 
     1. Test P-SSD without cache enabled. Not a suggested comfiguration. just to understand the disk latency without cache. 
     2. None Cache IO test result is consistant with different VM size. Normal DB File sequencial read complete in 2-4ms.  
     3. Stress IO with different schema and work unit but keep thread number 1 to reduce parallel IO opertion contension. 
     4. Monitor the IO load with Azure Monitor Metrics and IOState.
 
-**AWR report**
-
-    For each individual AWR report saved in IOStress folder, saved in IOStress folder. Name conversion as following: 
+    For each individual AWR report saved in IOStress folder, saved in IOStress folder. Name conversion as following.
 
         awr_p30x2_d8s_s64_t1_wu64
         |   |     |   |   |  |--------------Work Unit - 64
@@ -94,43 +92,48 @@
         |   |     |   |---------------------load 64 Schema
         |   |     |-------------------------VM Size - D8s
         |   |-------------------------------2 P30 disk in DG
-        |-----------------------------------AWR Report Tag     
+        |-----------------------------------AWR Report Tag  
 
-**Metrics**
+# Metrics
 
-Deployment 1: 
-- Test with Ds Es vms. This round of test focus on single disk performance with small active set (100Gb)
-- For E series VM test, use various SLOB parameter to stress IO to 80-90% utilization except marked with *. This is a smaple data for 50% utilization from comparasion.
+## eployment 1: 
+    
+    - Test with Ds Es vms. This round of test focus on single disk performance with small active set (100GB-500GB)
+    - Use various SLOB parameter to stress IO to 80-90% utilization except marked with *. This is a smaple data for 50% utilization from comparasion.
+    - With host READ-ONLY cache enabled, IO latency was improved but with limited level due to host cache size.
 
-| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-| E32v3   | 51K/64K  |P30   |  5K  |  2  |  10K      | NONE  |  8039       |  4.2M      |-    |-    |-     |-     |-     |-   |-   |73.1|20.9|2.8  |2.4  |0.8  |0.0   |
-| E32v3   | 51K/64K  |P30   |  5K  |  2  |  10K      | READ  |  9215       |  4.8M      |-    |-    |-     |0.3   |13.2  |3.7 |0.6 |64.5|12.9|1.9  |2.1  |0.9  |0.0   |
-| E32v3   | 51K/64K  |P30   |  5K  | 16  |  80K      | NONE  |   61K       |  6.2M      |-    |-    |-     |-     |-     |-   |-   |73.2|18.1|3.7  |3.8  |1.1  |0.0   |
-| E32v3   | 51K/64K  |P30   |  5K  | 16  |  80K      | READ  |   44K*      |  4.4M      |-    |-    |-     |0.3   |8.8   |3.9 |1.5 |61.8|19.8|2.1  |1.4  |0.4  |0.0   |
-| E32v3   | 51K/64K  |P60   | 16K  |  2  |  32K      | NONE  |   25K       | 13.3M      |-    |-    |-     |-     |-     |-   |-   |90.1|4.9 |2.5  |2.2  |0.3  |0.0   |
-| E32v3   | 51K/64K  |P80   | 20K  |  2  |  40K      | NONE  |   33K       |  5.5M      |-    |-    |-     |-     |-     |-   |-   |60.5|23.4|4.5  |9.4  |2.2  |0.0   |
+    | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+    | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+    | D8sv3   | 51K/64K  |P30   |  5K  |  2  |  10K      | NONE  |  8039       |  4.2M      |-    |-    |-     |-     |-     |-   |-   |73.1|20.9|2.8  |2.4  |0.8  |0.0   |
+    | E32v3   | 51K/64K  |P30   |  5K  |  2  |  10K      | READ  |  9215       |  4.8M      |-    |-    |-     |0.3   |13.2  |3.7 |0.6 |64.5|12.9|1.9  |2.1  |0.9  |0.0   |
+    | E32v3   | 51K/64K  |P30   |  5K  | 16  |  80K      | NONE  |   61K       |  6.2M      |-    |-    |-     |-     |-     |-   |-   |73.2|18.1|3.7  |3.8  |1.1  |0.0   |
+    | E32v3   | 51K/64K  |P30   |  5K  | 16  |  80K      | READ  |   44K*      |  4.4M      |-    |-    |-     |0.3   |8.8   |3.9 |1.5 |61.8|19.8|2.1  |1.4  |0.4  |0.0   |
+    | E32v3   | 51K/64K  |P60   | 16K  |  2  |  32K      | NONE  |   25K       | 13.3M      |-    |-    |-     |-     |-     |-   |-   |90.1|4.9 |2.5  |2.2  |0.3  |0.0   |
+    | E32v3   | 51K/64K  |P80   | 20K  |  2  |  40K      | NONE  |   33K       |  5.5M      |-    |-    |-     |-     |-     |-   |-   |60.5|23.4|4.5  |9.4  |2.2  |0.0   |
 
-* For M series VM test, skip the none cached disk performance as it is not the recommend solution. But anyway, did one quick test. 97% DB file sequencial read completed in 2-4ms. Similar result as E32 system. For M series test, focus on large active data set and Write Accelerate.
+## Deployment 2: 
 
-- For M series, Accelerate Writer is suggested to enable on REDO log disk, not DB data disk. 
+    - M series VM test targets for large Data volume.
+    - IOPS P30x32 is higher than P60x8. As P30 with READ-ONLY Cache. M64 is capable for P30 IO Testing but have to swtich to M128 for P60. 
+    - Tested P30S DB without READ-ONLY cache and did not push to IOPS limitation. Over 90% DB file sequencial read completed in 2-4ms which is similar with Ds & Es. 
+    - Write Accelerate enabeld on REDO log Disk Group, not on DB file Disk Group. 
 
-Test 1: DB Node Host Cache (1024GiB x 2 Nodes) > 65GiB Active Dataset > 3GiB SGA
+### Test 1: DB Node Host Cache > 65GiB Active Dataset > 3GiB SGA
 
-| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
-| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+    | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+    | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+    | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
+    | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
+    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
-- Each stress lasted for 5min. During stress period, IOPS for each disk stable at 5K.
-- Over 50% completed less than 512us. less than 20% over 2ms.
-- Write Accelarate make it even better. 50% less than 256us, 95% completed in 1ms. 
+      - Azure VM Metrics indicate almost 100% READ Cache Hit rate. 
+      - Over 50% completed less than 512us. less than 20% over 2ms.
+      - Write Accelarate make it even better. 50% less than 256us, 95% completed in 1ms. 
 
-Test 2: DB Node Host Cache (1024GiB x 2 Nodes) = 2048GiB Active Dataset (SCALE=2GiB, SCHEMA_NUM = 1024) > 40GiB SGA
+### Test 2: DB Node Host Cache (1024GiB x 2 Nodes) = 2048GiB Active Dataset (SCALE=2GiB, SCHEMA_NUM = 1024) > 40GiB SGA
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
 | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
@@ -141,9 +144,10 @@ Test 2: DB Node Host Cache (1024GiB x 2 Nodes) = 2048GiB Active Dataset (SCALE=2
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
-Test 3: 2048GiB Active Dataset (SCALE=4GiB, SCHEMA_NUM = 768) > DB Node Host Cache (1024GiB x 2 Nodes) > 40GiB SGA
+### Test 3: 2048GiB Active Dataset (SCALE=4GiB, SCHEMA_NUM = 768) > DB Node Host Cache (1024GiB x 2 Nodes) > 40GiB SGA
 
 
+# Conclusion: 
 
 
 

@@ -89,7 +89,7 @@
         - Locating REDO log in different DG is necessary as Write Accelerate suggested on REDO log only, not on DB file.
         - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace.
 
-![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg)
+![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg?raw=true)
 
 # SLOB Test
 
@@ -140,7 +140,7 @@
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6 |11.4 |4.1  |0.8  |2.0  |0.1  |0.0  |0.0   |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7  |1.0  |4.0  |0.4  |0.0  |0.0  |0.0  |0.0   |
 
-![Test 1](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
+![Test 1](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg?raw=true)
 
       - Azure VM Metrics indicate almost 100% READ Cache Hit rate. 
       - Over 50% completed less than 512us. less than 20% over 2ms.
@@ -156,7 +156,7 @@
 
     * M64 HOST CACHE: 1228GiB * 2 = 8GiB * 307 | M128 HOST CACHE: 2456 * 2 = 8GiB * 614
 
-![Test 2](ScreenShot/SLOB_Stress_M64_2TData_P30_Low_Cache_Hit_5min_DiskIO.jpg)
+![Test 2](ScreenShot/SLOB_Stress_M64_2TData_P30_Low_Cache_Hit_5min_DiskIO.jpg?raw=true)
 
     - With M64, due to lower cache hit rate after VM boot, VM Max NONE CACHE IOPS limitation applied on DB node. 
     - Both Calibrate_IO and SLOB push disk IO near 2.5K on each disk.
@@ -168,7 +168,7 @@
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
 | M128    | 80K/160K |P60   |  5K  |  32 | 160K      | R-WA  |   77K       |    6M      |-    |-    | 0.1  |6.0   |24.2  |8.5  |4.8  |43.0 |11.6 |1.2  |0.2  |0.1  |0.2   |
  
-![Test 3](ScreenShot/SLOB_Stress_M128_2TData_P30_Medium_Cache_Hit_5min_DiskIO.jpg)
+![Test 3](ScreenShot/SLOB_Stress_M128_2TData_P30_Medium_Cache_Hit_5min_DiskIO.jpg?raw=true)
 
     - With M128, it takes a while to load enough data to host cache so that Cache Hit rate to stable at medium level.
     - IO Latency is improved compare with Low cache hit.
@@ -179,7 +179,7 @@
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
 | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |     80K     |   2.3      |-    |-    | -    |-     |-     |-    |-    |31.3 |42.8 |14.3 |4.5  |3.7  |2.9   |
 
-![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg)
+![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg?raw=true)
 
     - Since VM IOPS limit is 80K. the IOPS tested result is the sum of two nodes.
     - Workload is not balanced in the test, node 2 used up all the disk capacity due to sessions not evenly balanced in two nodes.

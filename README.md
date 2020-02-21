@@ -3,7 +3,7 @@ PoC for setup FlashGrid on China Azure
 
 |  Name                             | Content   |
 |  ----                             | ----      |
-|  [SETUP.MD](./SETUP.md)           | Steps to deploy FlashGrid SkyCluster on China Azure   |
+|  [SETUP.MD](./Setup.md)           | Steps to deploy FlashGrid SkyCluster on China Azure   |
 |  [FAQ.MD](./FAQ.md)               | Questions that discussed with FlashGrid.   |
 |  [IOSTRESS.MD](./IOStress.md)     | IO Stress test summary   |
 |                                   |                      |

@@ -89,7 +89,7 @@
         - Locating REDO log in different DG is necessary as Write Accelerate suggested on REDO log only, not on DB file.
         - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace.
 
-![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg?raw=true)
+![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg)
 
 # SLOB Test
 

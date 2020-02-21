@@ -87,7 +87,7 @@
         - Add additional temp file to TEMP tablespace. When loading large data volume, Default 32GiB temp file could be used up. 
         - Set REDO logs to a dedicate Disk Group (FRA) to avoid IO impact on Database DG. 
         - Locating REDO log in different DG is necessary as Write Accelerate suggested on REDO log only, not on DB file.
-        - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace as below.
+        - Create Bigfile Tablespace named IOPS. It takes hours to complete when the size reaches TB level. Sample for sizing 8TB tablespace.
 
 ![SLOB Load](ScreenShot/Oracle_TableSpace_8TB_P30_DiskIO.jpg)
 
@@ -179,11 +179,11 @@
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
 | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |     80K     |   2.3      |-    |-    | -    |-     |-     |-    |-    |31.3 |42.8 |14.3 |4.5  |3.7  |2.9   |
 
+![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg)
+
     - Since VM IOPS limit is 80K. the IOPS tested result is the sum of two nodes.
     - Workload is not balanced in the test, node 2 used up all the disk capacity due to sessions not evenly balanced in two nodes.
     - P60 provide high IOPS per disk, while latency is same as other P-SSD, like P30, with READ-ONLY cache disabled. 
-
-![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg)
 
 # Learning: 
 

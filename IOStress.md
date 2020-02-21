@@ -91,10 +91,11 @@
 
 # SLOB Test
 
-    1. Test P-SSD without cache enabled. Not a suggested comfiguration. just to understand the disk latency without cache. 
-    2. None Cache IO test result is consistant with different VM size. Normal DB File sequencial read complete in 2-4ms.  
-    3. Stress IO with different schema and work unit but keep thread number 1 to reduce parallel IO opertion contension. 
-    4. Monitor the IO load with Azure Monitor Metrics and IOState.
+    1. Restart RAC before test to clear SGA and HOST CACHE.
+    2. Test P-SSD without cache enabled. Not a suggested comfiguration. just to understand the disk latency without cache. 
+    3. None Cache IO test result is consistant with different VM size. Normal DB File sequencial read complete in 2-4ms.  
+    4. Stress IO with different schema and work unit but keep thread number 1 to reduce parallel IO opertion contension. 
+    5. Monitor the IO load with Azure Monitor Metrics and IOState.
 
     For each individual AWR report saved in IOStress folder, saved in IOStress folder. Name conversion as following.
 
@@ -130,13 +131,12 @@
     - Tested P30S DB without READ-ONLY cache and did not push to IOPS limitation. Over 90% DB file sequencial read completed in 2-4ms which is similar with Ds & Es. 
     - Write Accelerate enabeld on REDO log Disk Group, not on DB file Disk Group. 
 
-### Test 1: RAC Host Cache >> 65GiB Active Dataset > 3GiB SGA
+### Test 1: P30S DB, Host Cache >> 65GiB Active Dataset > 3GiB SGA. Cache Hit (100%).
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |  125K       | 39.8M      |-    |-    |-     |4.2   |48.8  |28.6 |11.4 |4.1  |0.8  |2.0  |0.1  |0.0  |0.0   |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |  107K       | 33.8M      |-    |-    | 2.2  |50.7  |37.0  |4.7  |1.0  |4.0  |0.4  |0.0  |0.0  |0.0  |0.0   |
-
 
 ![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
 
@@ -144,26 +144,44 @@
       - Over 50% completed less than 512us. less than 20% over 2ms.
       - Write Accelarate make it even better. 50% less than 256us, 95% completed in 1ms. 
 
-### Test 2: RAC Host Cache = Active Dataset >> 40GiB SGA
+
+### Test 2: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=100%, Cache Hit <30%
 
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
 | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | READ  |             |            |-    |-    |-     |4.2   |48.8  |28.6|11.4|4.1 |0.8 |2.0  |0.1  |0.0  |0.0   |
 | M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |             |            |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | NONE  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | R-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
 
-    * M64: 1228GiB * 2 = 8GiB * 307; M128: 2456 * 2 = 8GiB * 614
+    * M64 HOST CACHE: 1228GiB * 2 = 8GiB * 307 | M128 HOST CACHE: 2456 * 2 = 8GiB * 614
 
-![Result](ScreenShot/SLOB_Stress_65GData_P30_DiskIO_5min.jpg)
+![Test 2]()
 
-### Test 3: Active Dataset > RAC Host Cache >> 40GiB SGA
+    - With M64, due to lower cache hit rate after VM boot, VM Max NONE CACHE IOPS limitation applied on DB node. 
+    - Both Calibrate_IO and SLOB push disk IO near 2.5K on each disk.
+    - Resize M64 to M128 which includes OS reboot, disk IO hit to 5000 with same SlOB parameter.
+
+
+### Test 3: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=97%, Cache Hit = 50%
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT | DB_S_R_WAIT|<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | R-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+
+![Test 3]()
+
+### Test 4: P60S DB, NONE CACHE on Data Disk, READ-ONLY + Write Accelerate on REDO Log. SCALE = 256M, SCHEMA count = 512.
+    | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
+    | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
+    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+
+![Test 4]()
+
 
 
 # Learning: 
 
 - FlashGrid SkyCluster is able to support Oracle RAC on cloud with high IO throughput.
 - Push the Premium Data Disk IOPS to limitation does not impact Oracle OS Stability
+- P-SSD with large VM host cache can provide over 100K IOPS with very low latency(<1ms with high cache hit rate)
 - Disk with READ-ONLY CACHE is helpful to improve the IO performance. 
 - Without U-SSD in China, alterntive solution to use P-SSD with cache and Write Accelerate.
 - Precise calculate workload and data volume before select Disk/VM size. 

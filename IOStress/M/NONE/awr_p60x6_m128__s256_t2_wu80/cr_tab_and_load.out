@@ -1,0 +1,7 @@
+sqlplus is /u01/app/oracle/product/19.3.0/dbhome_1/bin/sqlplus
+tnsping is /u01/app/oracle/product/19.3.0/dbhome_1/bin/tnsping
+
+TNS Ping Utility for Linux: Version 19.0.0.0.0 - Production on 20-FEB-2020 17:44:07
+
+Copyright (c) 1997, 2019, Oracle.  All rights reserved.
+

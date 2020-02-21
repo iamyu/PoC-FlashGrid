@@ -70,10 +70,11 @@
     ALTER TABLESPACE SYSTEM ADD DATAFILE '+P30S' SIZE 24G;
     ALTER TABLESPACE SYSAUX ADD DATAFILE '+P30S' SIZE 24G;
     ALTER TABLESPACE TEMP add tempfile '+P30S' size 31G REUSE AUTOEXTEND ON NEXT 16G MAXSIZE UNLIMITED;
-
+    
     CREATE BIGFILE TABLESPACE IOPS DATAFILE '+P30S' SIZE 1024G AUTOEXTEND AUTOEXTEND NEXT 8G MAXSIZE UNLIMITED;
 
-
+    DROP TABLESPACE IOPS INCLUDING CONTENTS AND DATAFILES;
+    ALTER TABLESPACE IOPS2 RENAME TO IOPS;
 
 **DB files**
 
@@ -123,10 +124,10 @@
     show parameter db_file_multiblock_read_count
 
     alter system set sga_max_size=200G scope=spfile;
+    alter system set sga_max_size=40G scope=spfile;
     alter system set sga_target=200G scope=spfile;
     alter system set sga_target=40G scope=spfile;
-    alter system set sga_target=3G scope=spfile;
-
+    alter system set sga_target=14G scope=spfile;
 
 **MISC**
 

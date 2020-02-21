@@ -11,14 +11,14 @@
         * Manually move M8 quorum node to another availability set and resize to D4s for cost saving.
 
         --------------------------------------------------------------------------------------------------------
-        Size    vCore    RAM    Ddata disks    Cached throughput    None-cached throughput    Network bandwidth
+        Size     vCore    RAM    Ddata disks    Cached throughput    None-cached throughput    Network bandwidth
         --------------------------------------------------------------------------------------------------------
-        D8s_v3	8         32    16          16K/  128MBps/  200GiB      12800 / 192             4000Mbps
-        E32_v3	32       256    32          64K/  512MBps/  800GiB      51200 / 768             16000Mbps
-        E64_v3	64       432    32         128K/ 1024MBps/ 1600GiB      80000 / 1200            30000Mbps
-        M64     64      1024    64          80K/  800MBps/ 1228GiB      40000 / 1000            16000Mbps
-        M64s	64      1024    64          80K/  800MBPS/ 6348GiB      40000 / 1000            16000Mbps
-        M128	128     2048    64         250K/ 1600MBPS/ 2456GiB      80000 / 2000            32000Mbps
+        D8s_v3	 8         32    16          16K/  128MBps/  200GiB      12800 / 192             4000Mbps
+        E32_v3	 32       256    32          64K/  512MBps/  800GiB      51200 / 768             16000Mbps
+        E64_v3	 64       432    32         128K/ 1024MBps/ 1600GiB      80000 / 1200            30000Mbps
+        M64      64      1024    64          80K/  800MBps/ 1228GiB      40000 / 1000            16000Mbps
+        M64s	 64      1024    64          80K/  800MBPS/ 6348GiB      40000 / 1000            16000Mbps
+        M128	 128     2048    64         250K/ 1600MBPS/ 2456GiB      80000 / 2000            32000Mbps
         --------------------------------------------------------------------------------------------------------
 
     OS disk
@@ -41,7 +41,11 @@
         P60S       Good    AllNodes  NORMAL  16777216  12398008  Enabled    None    P30 x 8 x 2 nodes
         P80        Good    AllNodes  NORMAL  67106816  62727408  Enabled    None    P80 x 1 x 2 nodes
         ---------------------------------------------------------------------------------------------------------
-        * P60S means use P30 Disk to create same capacity as one P60 (striped)
+    **NOTE:**
+        - P60S means use P30 Disk to create same capacity as one P60 (striped)
+        - P60 & P80 disks are added manually to ASM after cluster deployed. 
+        - Use NONE cached disk is not recommended/supported by FlashGrid for the time being (Feb 2020)
+
 
     Deployment 2 ASM DG:
         ---------------------------------------------------------------------------------------------------------
@@ -56,9 +60,7 @@
 
     **NOTE:**
         - Azure only enable Read-Only disk cache for disk less than 4TB. FlashGrid only support disks with READ-ONLY cache.
-        - P60 & P80 disks are added manually to ASM after cluster deployed. 
-        - FlashGrid reported OS issue when using NONE Caching disk for large IOPS. Did not experience this problem during Stress test.
-        - Use NONE cached disk is not recommended/supported by FlashGrid for the time being (Feb 2020)
+        - P30S & P60S here means multiple disks. 
   
 # Oracle DB
 

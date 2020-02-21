@@ -147,35 +147,41 @@
 
 ### Test 2: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=100%, Cache Hit <30%
 
-| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |             |            |-    |-    | 2.2  |50.7  |37.0  |4.7 |1.0 |4.0 |0.4 |0.0  |0.0  |0.0  |0.0   |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | R-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
+| :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
+| M64     | 40K/80K  |P30   |  5K  | 32  | 160K      | R-WA  |    67K      |   1.2M     |-    |-    |-     |3.6   |18.8  |3.9  |2.3  |29.4 |4.0  |3.1  |3.1  |29.0 |2.6   |
+
 
     * M64 HOST CACHE: 1228GiB * 2 = 8GiB * 307 | M128 HOST CACHE: 2456 * 2 = 8GiB * 614
 
-![Test 2]()
+![Test 2](ScreenShot/SLOB_Stress_M64_2TData_P30_Low_Cache_Hit_5min_DiskIO.jpg)
 
     - With M64, due to lower cache hit rate after VM boot, VM Max NONE CACHE IOPS limitation applied on DB node. 
     - Both Calibrate_IO and SLOB push disk IO near 2.5K on each disk.
-    - Resize M64 to M128 which includes OS reboot, disk IO hit to 5000 with same SlOB parameter.
+    - Resize M64 to M128 which includes OS reboot, disk IO hit to 5000 when cache rate is low. 
 
 
-### Test 3: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=97%, Cache Hit = 50%
-| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT | DB_S_R_WAIT|<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-| ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | R-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+### Test 3: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=100%, 50% > Cache Hit > 30%
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
+| :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
+| M128    | 80K/160K |P60   |  5K  |  32 | 160K      | R-WA  |   77K       |    6M      |-    |-    | 0.1  |6.0   |24.2  |8.5  |4.8  |43.0 |11.6 |1.2  |0.2  |0.1  |0.2   |
+ 
+![Test 3](ScreenShot/SLOB_Stress_M128_2TData_P30_Medium_Cache_Hit_5min_DiskIO.jpg)
 
-![Test 3]()
+    - With M128, it takes a while to load enough data to host cache so that Cache Hit rate to stable at medium level.
+    - IO Latency is improved compare with Low cache hit.
+    - Cache hit on two DB nodes are not balanced. As the Active Database size is pretty large, the scenario is reasonable.  
 
 ### Test 4: P60S DB, NONE CACHE on Data Disk, READ-ONLY + Write Accelerate on REDO Log. SCALE = 256M, SCHEMA count = 512.
-    | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms|<2ms|<4ms|<8ms|<16ms|<32ms|<64ms|<128ms|
-    | ----    |--------- |----  |----  |---- |---------  | ----  | ----------- |----------- |---- |---- |----  |----  |----  |----|----|----|----|---- |---- |---- |----  |
-    | M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |             |            |0.0  |0.0  | 0.0  |0.0   |0.0   |0.0 |0.0 |0.0 |0.0 |0.0  |0.0  |0.0  |0.0   |
+| VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
+| :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |     80K     |   2.3      |-    |-    | -    |-     |-     |-    |-    |31.3 |42.8 |14.3 |4.5  |3.7  |2.9   |
 
-![Test 4]()
+    - Since VM IOPS limit is 80K. the IOPS tested result is the sum of two nodes.
+    - Workload is not balanced in the test, node 2 used up all the disk capacity due to sessions not evenly balanced in two nodes.
+    - P60 provide high IOPS per disk, while latency is same as other P-SSD, like P30, with READ-ONLY cache disabled. 
 
-
+![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg)
 
 # Learning: 
 
@@ -185,4 +191,4 @@
 - Disk with READ-ONLY CACHE is helpful to improve the IO performance. 
 - Without U-SSD in China, alterntive solution to use P-SSD with cache and Write Accelerate.
 - Precise calculate workload and data volume before select Disk/VM size. 
-- Use disks under 4T can be a good option, especailly for RAC, if it can provide required capacity. 
+- Use disks under 4T can be a good option, if it can provide required capacity. 

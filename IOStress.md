@@ -166,7 +166,7 @@
 ### Test 3: P30S DB, Active Dataset (2T) >> 3GiB SGA. READ Percent=100%, 50% > Cache Hit > 30%
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
-| M128    | 80K/160K |P60   |  5K  |  32 | 160K      | R-WA  |   77K       |    6M      |-    |-    | 0.1  |6.0   |24.2  |8.5  |4.8  |43.0 |11.6 |1.2  |0.2  |0.1  |0.2   |
+| M128    | 80K/160K |P30   |  5K  |  32 | 160K      | R-WA  |   77K       |    6M      |-    |-    | 0.1  |6.0   |24.2  |8.5  |4.8  |43.0 |11.6 |1.2  |0.2  |0.1  |0.2   |
  
 ![Test 3](ScreenShot/SLOB_Stress_M128_2TData_P30_Medium_Cache_Hit_5min_DiskIO.jpg?raw=true)
 
@@ -177,7 +177,7 @@
 ### Test 4: P60S DB, NONE CACHE on Data Disk, READ-ONLY + Write Accelerate on REDO Log. SCALE = 256M, SCHEMA count = 512.
 | VM Size | Max_IOPS | DISK | IOPS | QTR | RAC_IOPS  | CACHE | IOPS_RESULT |DB_S_R_WAIT |<32us|<64us|<128us|<256us|<512us|<1ms |<2ms |<4ms |<8ms |<16ms|<32ms|<64ms|<128ms|
 | :---    |--------: |---:  |---:  |---: |--------:  | ---:  | ----------: |----------: |:--: |:--: |:--:  |:--:  |:--:  |:--: |:--: |:--: |:--: |:--: |:--: |:--: |:--:  |
-| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |     80K     |   2.3      |-    |-    | -    |-     |-     |-    |-    |31.3 |42.8 |14.3 |4.5  |3.7  |2.9   |
+| M128    | 80K/160K |P60   | 16K  |  8  | 128K      | N-WA  |     80K     |   2.3M     |-    |-    | -    |-     |-     |-    |-    |31.3 |42.8 |14.3 |4.5  |3.7  |2.9   |
 
 ![Test 4](ScreenShot/SLOB_Stress_M128_256GData_P60_No_Cache_10min_DiskIO.jpg?raw=true)
 

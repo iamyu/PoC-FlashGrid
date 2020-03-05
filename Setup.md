@@ -1,3 +1,6 @@
+** Oracle Soltion on Azure
+   check https://docs.microsoft.com/en-us/azure/virtual-machines/workloads/oracle/oracle-overview for landing Oracle solution on Azure. This PoC only target to test IO performance of FlashGrid Oracle RAC solution.
+
 **FlashGrid on Azure China**
 
 FlashGrid DOC for global Azure.
